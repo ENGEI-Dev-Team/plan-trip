@@ -1,0 +1,39 @@
+name: Lint and Test  # Actions 上での表示名
+
+on:
+  push:
+    branches: [main, develop]  # main / develop への push で起動
+  pull_request:
+    branches: [main, develop]  # main / develop 向け PR で起動
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest  # GitHub 提供の Ubuntu runner で実行
+    steps:
+      - name: Checkout  # ソースコードを取得
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm  # pnpm v9 をインストール
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node.js  # Node.js 20 をセットアップして pnpm キャッシュを利用
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies  # lockfile に従って依存を導入
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint  # ESLint
+        run: pnpm lint
+
+      - name: Unit tests  # Vitest
+        run: pnpm vitest run
+
+      # - name: Playwright (E2E)  # 必要になったらアンコメント
+      #   run: |
+      #     pnpm playwright install --with-deps
+      #     pnpm playwright test
