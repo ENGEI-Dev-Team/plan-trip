@@ -13,27 +13,22 @@ jobs:
       - name: Checkout  # ソースコードを取得
         uses: actions/checkout@v4
 
-      - name: Setup pnpm  # pnpm v9 をインストール
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
-
-      - name: Setup Node.js  # Node.js 20 をセットアップして pnpm キャッシュを利用
+      - name: Setup Node.js  # Node.js 20 + npm キャッシュを利用
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          cache: 'npm'
 
-      - name: Install dependencies  # lockfile に従って依存を導入
-        run: pnpm install --frozen-lockfile
+      - name: Install dependencies  # npm lockfile に従って依存を導入
+        run: npm ci
 
       - name: Lint  # ESLint
-        run: pnpm lint
+        run: npm run lint
 
       - name: Unit tests  # Vitest
-        run: pnpm vitest run
+        run: npx vitest run
 
       # - name: Playwright (E2E)  # 必要になったらアンコメント
       #   run: |
-      #     pnpm playwright install --with-deps
-      #     pnpm playwright test
+      #     npx playwright install --with-deps
+      #     npx playwright test
