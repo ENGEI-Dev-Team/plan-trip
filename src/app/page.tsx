@@ -10,7 +10,6 @@ export default function Home() {
         <Stack gap={8}>
           <HeroSection onCreateClick={() => {
             // Heroのボタンからも「作成カード」位置にスクロールさせたい場合などに使える
-            // テスト用コメント
             const el = document.getElementById("create-trip-card");
             el?.scrollIntoView({ behavior: "smooth" });
           }} />
