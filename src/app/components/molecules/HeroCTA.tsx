@@ -1,8 +1,9 @@
 import { Stack } from "@chakra-ui/react";
+console.log(Stack);
 import Link from "next/link";
-import { PageTitle } from "../components/atoms/PageTitle";
-import { BodyText } from "@/components/atoms/BodyText";
-import { PrimaryButton } from "@/components/atoms/PrimaryButton";
+import { PageTitle } from "../atoms/PageTitle";
+import { BodyText } from "../atoms/BodyText";
+import { PrimaryButton } from "../atoms/PrimaryButton";
 
 type HeroCTAProps = {
   // どこに遷移するかは親(Page / Organism)から渡す
@@ -11,7 +12,7 @@ type HeroCTAProps = {
 
 export const HeroCTA = ({ createPlanHref }: HeroCTAProps) => {
   return (
-    <Stack spacing={4} maxW="520px">
+    <Stack gap={4} maxW="520px">
       <PageTitle>
         1分でつくれる、
         <br />

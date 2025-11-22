@@ -1,33 +1,22 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { ChakraProviderWrapper } from "./ChakraProviderWrapper";
 
 export const metadata: Metadata = {
-  title: "TripBook",
-  description: "複数人旅行のしおりを共有する TripBook の開発プレビュー",
+  title: "PlanTrip",
+  description: "旅行しおりアプリ",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="ja">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body>
+        {/* ここでは Chakra は使わず、ラッパーに全部任せる */}
+        <ChakraProviderWrapper>{children}</ChakraProviderWrapper>
       </body>
     </html>
   );
