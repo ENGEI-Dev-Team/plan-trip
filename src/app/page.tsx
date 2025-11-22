@@ -1,5 +1,5 @@
 'use client'; // ItineraryDraftEditor内でuseState/useEffectが使われるため、クライアントコンポーネントとして実行します
-
+// test
 import React from 'react';
 // 旅のしおり編集コンポーネントをインポート
 import { ItineraryDraftEditor } from '@/components/organisms/ItineraryDraftEditor';
