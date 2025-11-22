@@ -1,68 +1,38 @@
-const highlights = [
-  "URL / 画像 / 印刷の 3 形態で旅程を共有",
-  "Supabase + Chakra UI + Next.js (App Router)",
-  "Week1 では MVP（作成→編集→共有）を最優先",
-];
+import TimelineEditor from "@/components/timeline/TimelineEditor";
 
-const upcoming = [
-  "地図ベース表示とカレンダー連携",
-  "ダッシュボード / マイページ",
-  "OGP / 印刷用レイアウトの仕上げ",
+const heroHighlights = [
+  "時間順ソートと手動並び替えをワンタップ切替",
+  "カテゴリ別・1人あたり費用を即時計算",
+  "localStorage で続きから編集OK",
 ];
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col justify-center bg-[#05060a] px-6 py-16 text-slate-100 sm:px-10">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-12 rounded-3xl border border-white/10 bg-white/5 p-10 backdrop-blur">
-        <header className="space-y-4">
-          <p className="text-sm uppercase tracking-[0.3em] text-pink-200">
+    <main className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-4 py-12 text-slate-100 sm:px-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
+        <section className="rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl shadow-black/40 backdrop-blur">
+          <p className="text-xs uppercase tracking-[0.4em] text-pink-200">
             PlanTrip
           </p>
-          <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">
-            旅行しおりアプリの MVP
+          <h1 className="mt-3 text-4xl font-semibold text-white sm:text-5xl">
+            旅のしおりをリアルタイム編集
           </h1>
-          <p className="text-lg text-slate-300">
-            幹事が迷わずスケジュールをまとめて、同行者がスマホ / PC /
-            紙で同じ情報を見られる体験をゴールに据えています。
+          <p className="mt-4 text-lg text-slate-300">
+            タイムラインへの入力・並び替え・費用管理を 1 画面に集約。幹事も参加者も迷わず使える編集体験を提供します。
           </p>
-        </header>
-
-        <section className="grid gap-8 sm:grid-cols-2">
-          <article className="rounded-2xl border border-white/10 bg-black/20 p-6">
-            <p className="text-sm font-semibold text-pink-200">Focus</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">
-              今スプリントでやること
-            </h2>
-            <ul className="mt-4 space-y-2 text-slate-200">
-              {highlights.map((item) => (
-                <li key={item} className="flex items-start gap-2 text-base">
-                  <span className="mt-1 h-2 w-2 rounded-full bg-pink-300" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </article>
-
-          <article className="rounded-2xl border border-white/10 bg-black/10 p-6">
-            <p className="text-sm font-semibold text-sky-200">Next Up</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">
-              次フェーズの検討項目
-            </h2>
-            <ul className="mt-4 space-y-2 text-slate-200">
-              {upcoming.map((item) => (
-                <li key={item} className="flex items-start gap-2 text-base">
-                  <span className="mt-1 h-2 w-2 rounded-full bg-sky-300" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </article>
+          <div className="mt-6 flex flex-wrap gap-3">
+            {heroHighlights.map((item) => (
+              <span
+                key={item}
+                className="rounded-full border border-white/10 bg-white/5 px-4 py-1 text-sm text-slate-200"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
         </section>
 
-        <footer className="flex flex-col gap-3 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-          <span>ブランチ: develop / feature-* ブランチで作業中</span>
-          <span>CI: GitHub Actions で pnpm lint & vitest を実行</span>
-        </footer>
+        <TimelineEditor />
       </div>
     </main>
   );
