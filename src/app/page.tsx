@@ -1,3 +1,9 @@
+'use client'; // ItineraryDraftEditor内でuseState/useEffectが使われるため、クライアントコンポーネントとして実行します
+
+import React from 'react';
+// 旅のしおり編集コンポーネントをインポート
+import { ItineraryDraftEditor } from '@/components/organisms/ItineraryDraftEditor';
+
 const highlights = [
   "URL / 画像 / 印刷の 3 形態で旅程を共有",
   "Supabase + Chakra UI + Next.js (App Router)",
@@ -14,6 +20,10 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col justify-center bg-[#05060a] px-6 py-16 text-slate-100 sm:px-10">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-12 rounded-3xl border border-white/10 bg-white/5 p-10 backdrop-blur">
+        
+        {/* ★★★ ここにItineraryDraftEditorが追加されています ★★★ */}
+        <ItineraryDraftEditor />
+
         <header className="space-y-4">
           <p className="text-sm uppercase tracking-[0.3em] text-pink-200">
             PlanTrip
