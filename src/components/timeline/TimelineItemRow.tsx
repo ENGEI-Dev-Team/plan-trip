@@ -1,3 +1,4 @@
+import { useState, type ChangeEvent } from "react";
 import { SortMode, TimelineCategory, TimelineItem } from "@/types/timeline";
 
 interface CategoryOption {
@@ -33,6 +34,31 @@ export default function TimelineItemRow({
   const currentCategory = categoryOptions.find(
     (option) => option.value === item.category,
   );
+  const [amountInput, setAmountInput] = useState(
+    Number.isNaN(item.amount) ? "" : String(item.amount),
+  );
+
+  const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const raw = event.currentTarget.value;
+    setAmountInput(raw);
+    if (raw === "") return;
+    const parsed = Number(raw);
+    if (Number.isNaN(parsed)) return;
+    onChange(item.id, { amount: parsed });
+  };
+
+  const handleAmountBlur = () => {
+    if (amountInput === "") {
+      setAmountInput("0");
+      onChange(item.id, { amount: 0 });
+      return;
+    }
+    const parsed = Number(amountInput);
+    if (Number.isNaN(parsed)) return;
+    const clamped = Math.max(0, parsed);
+    setAmountInput(String(clamped));
+    onChange(item.id, { amount: clamped });
+  };
 
   return (
     <div className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-4">
@@ -114,12 +140,9 @@ export default function TimelineItemRow({
             <input
               type="number"
               min={0}
-              value={Number.isNaN(item.amount) ? "" : item.amount}
-              onChange={(event) =>
-                onChange(item.id, {
-                  amount: Number(event.currentTarget.value || 0),
-                })
-              }
+              value={amountInput}
+              onChange={handleAmountChange}
+              onBlur={handleAmountBlur}
               className="flex-1 bg-transparent text-right text-lg outline-none"
             />
           </div>

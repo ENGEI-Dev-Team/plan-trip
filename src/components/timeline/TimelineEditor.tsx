@@ -115,32 +115,6 @@ const createEmptyItem = (orderIndex: number): TimelineItem => ({
   orderIndex,
 });
 
-const loadInitialItems = (): TimelineItem[] => {
-  if (typeof window === "undefined") return DEFAULT_ITEMS;
-  try {
-    const stored = window.localStorage.getItem(TIMELINE_STORAGE_KEY);
-    if (!stored) return DEFAULT_ITEMS;
-    const parsed = JSON.parse(stored);
-    if (!Array.isArray(parsed)) return DEFAULT_ITEMS;
-    return parsed as TimelineItem[];
-  } catch {
-    return DEFAULT_ITEMS;
-  }
-};
-
-const loadInitialPeopleCount = (): number => {
-  if (typeof window === "undefined") return 2;
-  try {
-    const saved = window.localStorage.getItem(PEOPLE_STORAGE_KEY);
-    if (!saved) return 2;
-    const parsed = Number(saved);
-    if (Number.isNaN(parsed) || parsed <= 0) return 2;
-    return parsed;
-  } catch {
-    return 2;
-  }
-};
-
 const timeToMinutes = (value: string) => {
   if (!value) return Number.MAX_SAFE_INTEGER;
   const [hours, mins] = value.split(":").map(Number);
@@ -156,10 +130,41 @@ const timeToMinutes = (value: string) => {
 };
 
 export default function TimelineEditor() {
-  const [items, setItems] = useState<TimelineItem[]>(loadInitialItems);
+  const [items, setItems] = useState<TimelineItem[]>(DEFAULT_ITEMS);
   const [sortMode, setSortMode] = useState<SortMode>("time");
-  const [peopleCount, setPeopleCount] =
-    useState<number>(loadInitialPeopleCount);
+  const [peopleCount, setPeopleCount] = useState<number>(2);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = window.localStorage.getItem(TIMELINE_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setItems(parsed as TimelineItem[]);
+        }
+      }
+    } catch {
+      // ignore malformed localStorage
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const saved = window.localStorage.getItem(PEOPLE_STORAGE_KEY);
+      if (saved) {
+        const parsed = Number(saved);
+        if (!Number.isNaN(parsed) && parsed > 0) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setPeopleCount(parsed);
+        }
+      }
+    } catch {
+      // ignore malformed localStorage
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
