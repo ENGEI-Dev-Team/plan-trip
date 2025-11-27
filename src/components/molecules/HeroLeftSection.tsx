@@ -8,9 +8,12 @@ import {
   Tag,
   Text,
 } from "@chakra-ui/react";
-import Link from "next/link";
 
-export const HeroLeftSection = () => {
+type HeroLeftSectionProps = {
+  onCreateClick?: () => void;
+};
+
+export const HeroLeftSection = ({ onCreateClick }: HeroLeftSectionProps) => {
   return (
     <Stack gap={5} flex="1">
       <Heading
@@ -31,30 +34,29 @@ export const HeroLeftSection = () => {
       </Text>
 
       <Stack gap={3}>
-        <Link href="/edit">
-          <Button
-            borderRadius="full"
-            size="lg"
-            w={{ base: "100%", md: "auto" }}
-            px={8}
-            fontWeight="semibold"
-            bg="orange.300"
-            color="white"
-            boxShadow="0 14px 30px rgba(248, 180, 80, 0.55)"
-            _hover={{
-              bg: "orange.400",
-              boxShadow: "0 18px 36px rgba(248, 180, 80, 0.7)",
-              transform: "translateY(-1px)",
-            }}
-            _active={{
-              bg: "orange.400",
-              boxShadow: "0 8px 20px rgba(248, 180, 80, 0.5)",
-              transform: "translateY(0)",
-            }}
-          >
-            旅行プラン作成をはじめる
-          </Button>
-        </Link>
+        <Button
+          borderRadius="full"
+          size="lg"
+          w={{ base: "100%", md: "auto" }}
+          px={8}
+          fontWeight="semibold"
+          bg="orange.300"
+          color="white"
+          boxShadow="0 14px 30px rgba(248, 180, 80, 0.55)"
+          _hover={{
+            bg: "orange.400",
+            boxShadow: "0 18px 36px rgba(248, 180, 80, 0.7)",
+            transform: "translateY(-1px)",
+          }}
+          _active={{
+            bg: "orange.400",
+            boxShadow: "0 8px 20px rgba(248, 180, 80, 0.5)",
+            transform: "translateY(0)",
+          }}
+          onClick={onCreateClick}
+        >
+          旅行プラン作成をはじめる
+        </Button>
 
         <Text fontSize="xs" color="gray.500">
           入力は4つだけ（タイトル・都道府県・開始日・終了日）。
