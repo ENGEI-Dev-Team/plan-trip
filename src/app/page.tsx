@@ -1,16 +1,16 @@
-import { PrintNavigationButton } from '../components/atoms/PrintNavigationButton';
 
+'use client'; // ItineraryDraftEditor内でuseState/useEffectが使われるため、クライアントコンポーネントとして実行します
+// test
+import React from 'react';
+// 旅のしおり編集コンポーネントをインポート
+import { ItineraryDraftEditor } from '@/components/organisms/ItineraryDraftEditor';
 const highlights = [
   "URL / 画像 / 印刷の 3 形態で旅程を共有",
   "Supabase + Chakra UI + Next.js (App Router)",
   "Week1 では MVP（作成→編集→共有）を最優先",
 ];
 
-const upcoming = [
-  "地図ベース表示とカレンダー連携",
-  "ダッシュボード / マイページ",
-  "OGP / 印刷用レイアウトの仕上げ",
-];
+import { PlanTripHero } from "@/components/organisms/PlanTripHero";
 
 export default function Home() {
 
@@ -23,6 +23,10 @@ export default function Home() {
       <PrintNavigationButton itineraryId={itineraryId} />
     </div>
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-12 rounded-3xl border border-white/10 bg-white/5 p-10 backdrop-blur">
+        
+        {/* ★★★ ここにItineraryDraftEditorが追加されています ★★★ */}
+        <ItineraryDraftEditor />
+
         <header className="space-y-4">
           <p className="text-sm uppercase tracking-[0.3em] text-pink-200">
             PlanTrip
@@ -76,3 +80,5 @@ export default function Home() {
     </main>
   );
 }
+
+// ブランチテストのための更新
