@@ -10,11 +10,7 @@ const highlights = [
   "Week1 では MVP（作成→編集→共有）を最優先",
 ];
 
-const upcoming = [
-  "地図ベース表示とカレンダー連携",
-  "ダッシュボード / マイページ",
-  "OGP / 印刷用レイアウトの仕上げ",
-];
+import { PlanTripHero } from "@/components/organisms/PlanTripHero";
 
 export default function Home() {
   return (
