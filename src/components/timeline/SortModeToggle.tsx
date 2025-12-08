@@ -1,3 +1,4 @@
+import { Card, Grid, Text } from "@chakra-ui/react";
 import { SortMode } from "@/types/timeline";
 
 interface SortModeToggleProps {
@@ -12,30 +13,41 @@ const modes: { value: SortMode; label: string; description: string }[] = [
 
 export default function SortModeToggle({ value, onChange }: SortModeToggleProps) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
-      <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-        並び順モード
-      </p>
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        {modes.map((mode) => {
-          const active = value === mode.value;
-          return (
-            <button
-              type="button"
-              key={mode.value}
-              onClick={() => onChange(mode.value)}
-              className={`rounded-2xl border px-4 py-3 text-left transition ${
-                active
-                  ? "border-pink-300/60 bg-pink-500/10 text-white"
-                  : "border-white/10 bg-white/5 text-slate-300 hover:border-white/30"
-              }`}
-            >
-              <p className="text-base font-semibold">{mode.label}</p>
-              <p className="text-sm text-slate-400">{mode.description}</p>
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    <Card.Root variant="subtle">
+      <Card.Body>
+        <Text fontSize="xs" textTransform="uppercase" letterSpacing="0.3em" color="gray.400">
+          並び順モード
+        </Text>
+        <Grid gap={3} mt={3} templateColumns={{ base: "1fr", sm: "repeat(2, minmax(0, 1fr))" }}>
+          {modes.map((mode) => {
+            const active = value === mode.value;
+            return (
+              <Card.Root
+                key={mode.value}
+                variant={active ? "outline" : "elevated"}
+                borderColor={active ? "pink.300" : "blackAlpha.100"}
+                bg={active ? "pink.50" : "white"}
+                cursor="pointer"
+                onClick={() => onChange(mode.value)}
+                transition="all 0.15s ease"
+                _hover={{
+                  borderColor: "pink.200",
+                  boxShadow: "0 10px 25px rgba(244, 114, 182, 0.15)",
+                }}
+              >
+                <Card.Body>
+                  <Text fontWeight="semibold" color="gray.800">
+                    {mode.label}
+                  </Text>
+                  <Text fontSize="sm" color="gray.500">
+                    {mode.description}
+                  </Text>
+                </Card.Body>
+              </Card.Root>
+            );
+          })}
+        </Grid>
+      </Card.Body>
+    </Card.Root>
   );
 }

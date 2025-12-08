@@ -2,6 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  Box,
+  Button,
+  Card,
+  Grid,
+  Separator,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
+import {
   SortMode,
   TimelineCategory,
   TimelineItem,
@@ -252,58 +261,86 @@ export default function TimelineEditor() {
   const isEmpty = sortedItems.length === 0;
 
   return (
-    <section className="space-y-8 rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-black/40 backdrop-blur">
-      <header className="space-y-2">
-        <p className="text-xs uppercase tracking-[0.3em] text-pink-200">
-          Timeline
-        </p>
-        <h2 className="text-3xl font-semibold text-white">旅のタイムライン編集</h2>
-        <p className="text-sm text-slate-400">
-          時刻の自動整列と手動並び替えを切り替えつつ、カテゴリ別の費用も同時に管理できます。入力内容は localStorage に保存されるので続きから編集可能です。
-        </p>
-      </header>
-      <SortModeToggle value={sortMode} onChange={setSortMode} />
+    <Card.Root
+      variant="solid"
+      borderRadius="2xl"
+      border="1px solid"
+      borderColor="blackAlpha.100"
+      bg="gray.900"
+      color="white"
+      shadow="2xl"
+    >
+      <Card.Body as={Stack} spacing={6}>
+        <Stack spacing={2}>
+          <Text fontSize="xs" textTransform="uppercase" letterSpacing="0.3em" color="pink.200">
+            Timeline
+          </Text>
+          <Text fontSize="2xl" fontWeight="semibold">
+            旅のタイムライン編集
+          </Text>
+          <Text fontSize="sm" color="gray.300">
+            時刻の自動整列と手動並び替えを切り替えつつ、カテゴリ別の費用も同時に管理できます。入力内容は localStorage に保存されるので続きから編集可能です。
+          </Text>
+        </Stack>
 
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <div className="space-y-4">
-          {isEmpty ? (
-            <div className="rounded-3xl border border-dashed border-white/20 p-6 text-center text-sm text-slate-400">
-              まだタイムライン項目がありません。まずは「+ 項目を追加」を押してみましょう。
-            </div>
-          ) : (
-            sortedItems.map((item, index) => (
-              <TimelineItemRow
-                key={item.id}
-                item={item}
-                sortMode={sortMode}
-                categoryOptions={CATEGORY_OPTIONS}
-                isFirst={index === 0}
-                isLast={index === sortedItems.length - 1}
-                onChange={updateItem}
-                onDelete={deleteItem}
-                onMove={moveItem}
-              />
-            ))
-          )}
+        <SortModeToggle value={sortMode} onChange={setSortMode} />
 
-          <button
-            type="button"
-            onClick={addItem}
-            className="w-full rounded-3xl border border-dashed border-white/30 py-4 text-center text-sm font-semibold text-slate-200 transition hover:border-pink-300 hover:text-white"
-          >
-            + 項目を追加
-          </button>
-        </div>
+        <Grid gap={6} templateColumns={{ base: "1fr", lg: "2fr 1fr" }}>
+          <Stack spacing={4}>
+            {isEmpty ? (
+              <Box
+                borderRadius="xl"
+                border="1px dashed"
+                borderColor="whiteAlpha.300"
+                p={6}
+                textAlign="center"
+                color="gray.300"
+                fontSize="sm"
+              >
+                まだタイムライン項目がありません。まずは「+ 項目を追加」を押してみましょう。
+              </Box>
+            ) : (
+              sortedItems.map((item, index) => (
+                <TimelineItemRow
+                  key={item.id}
+                  item={item}
+                  sortMode={sortMode}
+                  categoryOptions={CATEGORY_OPTIONS}
+                  isFirst={index === 0}
+                  isLast={index === sortedItems.length - 1}
+                  onChange={updateItem}
+                  onDelete={deleteItem}
+                  onMove={moveItem}
+                />
+              ))
+            )}
 
-        <TimelineSummary
-          categoryTotals={categoryTotals}
-          totalAmount={totalAmount}
-          perPersonAmount={perPersonAmount}
-          peopleCount={peopleCount}
-          onPeopleChange={setPeopleCount}
-          categoryMeta={SUMMARY_CATEGORY_META}
-        />
-      </div>
-    </section>
+            <Button
+              variant="outline"
+              colorPalette="pink"
+              borderStyle="dashed"
+              onClick={addItem}
+            >
+              + 項目を追加
+            </Button>
+          </Stack>
+
+          <TimelineSummary
+            categoryTotals={categoryTotals}
+            totalAmount={totalAmount}
+            perPersonAmount={perPersonAmount}
+            peopleCount={peopleCount}
+            onPeopleChange={setPeopleCount}
+            categoryMeta={SUMMARY_CATEGORY_META}
+          />
+        </Grid>
+
+        <Separator borderColor="whiteAlpha.300" />
+
+        <Text fontSize="xs" color="gray.400">
+          入力内容はブラウザのローカルに保存されます。別デバイスでも共有する場合は保存・共有機能と組み合わせてください。
+        </Text>
+      </Card.Body>
+    </Card.Root>
   );
 }

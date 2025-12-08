@@ -50,7 +50,7 @@ export function loadDraft(): ItineraryDraft | null {
     }
     return null;
   } catch (e) {
-    console.warn('[AutoSave] No valid draft found in cookie.');
+    console.warn('[AutoSave] No valid draft found in cookie.', e);
     return null;
   }
 }

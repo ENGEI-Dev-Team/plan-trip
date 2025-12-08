@@ -1,3 +1,5 @@
+import { Button, HStack, Text } from "@chakra-ui/react";
+
 interface PeopleCounterProps {
   value: number;
   onChange: (value: number) => void;
@@ -8,24 +10,28 @@ export default function PeopleCounter({ value, onChange }: PeopleCounterProps) {
   const increment = () => onChange(value + 1);
 
   return (
-    <div className="flex items-center gap-4">
-      <button
-        type="button"
+    <HStack spacing={3} align="center">
+      <Button
+        aria-label="人数を減らす"
+        variant="outline"
+        colorPalette="gray"
+        size="sm"
         onClick={decrement}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-2xl text-white transition hover:border-white/40"
       >
         -
-      </button>
-      <span className="min-w-[5rem] text-center text-xl font-semibold text-white">
+      </Button>
+      <Text minW="5rem" textAlign="center" fontSize="lg" fontWeight="semibold">
         {value} 人
-      </span>
-      <button
-        type="button"
+      </Text>
+      <Button
+        aria-label="人数を増やす"
+        variant="outline"
+        colorPalette="gray"
+        size="sm"
         onClick={increment}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-2xl text-white transition hover:border-white/40"
       >
         +
-      </button>
-    </div>
+      </Button>
+    </HStack>
   );
 }

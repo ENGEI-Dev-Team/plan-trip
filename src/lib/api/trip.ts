@@ -2,7 +2,8 @@
 import type { TripCreateInput } from "@/types/trip";
 
 // TODO: Supabase 実装に差し替え
-export async function createTrip(input: TripCreateInput): Promise<{ id: string }> {
+export async function createTrip(_input: TripCreateInput): Promise<{ id: string }> {
+  void _input;
   // ここに Supabase の insert ロジックを追加する想定
   // 例:
   // const { data, error } = await supabase

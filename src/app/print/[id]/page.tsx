@@ -129,7 +129,8 @@ interface PrintPageProps {
   };
 }
 
-export default async function PrintPage({ params }: PrintPageProps) {
+export default async function PrintPage({ params: _params }: PrintPageProps) {
+  void _params;
   // 実際の実装では、APIやデータベースからデータを取得
   // const data = await fetchItineraryData(params.id);
   
@@ -143,7 +144,8 @@ export default async function PrintPage({ params }: PrintPageProps) {
 }
 
 // メタデータ設定
-export async function generateMetadata({ params }: PrintPageProps) {
+export async function generateMetadata({ params: _params }: PrintPageProps) {
+  void _params;
   return {
     title: '旅のしおり印刷',
     description: '旅のしおりを三つ折り形式で印刷',

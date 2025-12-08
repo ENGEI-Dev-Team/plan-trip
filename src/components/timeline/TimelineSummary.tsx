@@ -1,3 +1,11 @@
+import {
+  Badge,
+  Box,
+  Card,
+  Heading,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 import { TimelineCategory } from "@/types/timeline";
 import PeopleCounter from "./PeopleCounter";
 
@@ -27,48 +35,65 @@ export default function TimelineSummary({
   categoryMeta,
 }: TimelineSummaryProps) {
   return (
-    <aside className="flex h-full flex-col gap-4 rounded-3xl border border-white/10 bg-slate-900/60 p-5">
-      <header>
-        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-          費用サマリー
-        </p>
-        <h2 className="mt-2 text-2xl font-semibold text-white">Budget</h2>
-        <p className="text-sm text-slate-400">
-          カテゴリ別の合計と 1 人あたりの目安をリアルタイムに確認できます。
-        </p>
-      </header>
+    <Card.Root variant="subtle" h="100%">
+      <Card.Body as={Stack} spacing={4}>
+        <Stack spacing={1}>
+          <Text fontSize="xs" textTransform="uppercase" letterSpacing="0.3em" color="gray.500">
+            費用サマリー
+          </Text>
+          <Heading size="md" color="gray.800">
+            Budget
+          </Heading>
+          <Text fontSize="sm" color="gray.500">
+            カテゴリ別の合計と 1 人あたりの目安をリアルタイムに確認できます。
+          </Text>
+        </Stack>
 
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-        <p className="text-xs text-slate-400">人数</p>
-        <PeopleCounter value={peopleCount} onChange={onPeopleChange} />
-      </div>
+        <Card.Root variant="outline">
+          <Card.Body>
+            <Text fontSize="xs" color="gray.500">
+              人数
+            </Text>
+            <PeopleCounter value={peopleCount} onChange={onPeopleChange} />
+          </Card.Body>
+        </Card.Root>
 
-      <div className="space-y-2">
-        {(Object.keys(categoryMeta) as TimelineCategory[]).map((category) => (
-          <div
-            key={category}
-            className="flex items-center justify-between rounded-2xl border border-white/5 bg-white/5 px-4 py-2 text-sm text-white"
-          >
-            <span className={categoryMeta[category].accentClass}>
-              {categoryMeta[category].label}
-            </span>
-            <span className="font-semibold">
-              {formatCurrency(categoryTotals[category] ?? 0)}
-            </span>
-          </div>
-        ))}
-      </div>
+        <Stack spacing={2}>
+          {(Object.keys(categoryMeta) as TimelineCategory[]).map((category) => (
+            <Card.Root key={category} variant="ghost" border="1px solid" borderColor="blackAlpha.100">
+              <Card.Body py={3} px={4} display="flex" alignItems="center" justifyContent="space-between">
+                <Badge colorPalette="gray">{categoryMeta[category].label}</Badge>
+                <Text fontWeight="semibold" color="gray.800">
+                  {formatCurrency(categoryTotals[category] ?? 0)}
+                </Text>
+              </Card.Body>
+            </Card.Root>
+          ))}
+        </Stack>
 
-      <div className="mt-auto rounded-2xl border border-pink-300/60 bg-pink-500/10 px-4 py-3 text-white">
-        <p className="text-xs uppercase tracking-[0.3em] text-pink-200">Total</p>
-        <p className="text-3xl font-semibold">{formatCurrency(totalAmount)}</p>
-        <p className="text-sm text-pink-100">
-          1 人あたり{" "}
-          <span className="font-semibold">
-            {formatCurrency(Math.round(perPersonAmount))}
-          </span>
-        </p>
-      </div>
-    </aside>
+        <Box
+          mt="auto"
+          borderRadius="xl"
+          border="1px solid"
+          borderColor="pink.200"
+          bg="pink.50"
+          px={4}
+          py={3}
+        >
+          <Text fontSize="xs" textTransform="uppercase" letterSpacing="0.3em" color="pink.500">
+            Total
+          </Text>
+          <Text fontSize="2xl" fontWeight="semibold" color="gray.800">
+            {formatCurrency(totalAmount)}
+          </Text>
+          <Text fontSize="sm" color="pink.500">
+            1 人あたり{" "}
+            <Text as="span" fontWeight="semibold">
+              {formatCurrency(Math.round(perPersonAmount))}
+            </Text>
+          </Text>
+        </Box>
+      </Card.Body>
+    </Card.Root>
   );
 }

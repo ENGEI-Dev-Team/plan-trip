@@ -1,4 +1,16 @@
 import { useState, type ChangeEvent } from "react";
+import {
+  Badge,
+  Button,
+  Card,
+  Flex,
+  HStack,
+  Input,
+  NativeSelect,
+  Stack,
+  Text,
+  Textarea,
+} from "@chakra-ui/react";
 import { SortMode, TimelineCategory, TimelineItem } from "@/types/timeline";
 
 interface CategoryOption {
@@ -61,132 +73,158 @@ export default function TimelineItemRow({
   };
 
   return (
-    <div className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
-        <label className="flex flex-col text-sm text-slate-300 lg:w-32">
-          時間
-          <input
-            type="time"
-            value={item.time}
-            onChange={(event) =>
-              onChange(item.id, { time: event.currentTarget.value })
-            }
-            className="mt-1 rounded-2xl border border-white/10 bg-slate-900/50 px-3 py-2 text-base text-white outline-none focus:border-pink-300/60"
-          />
-        </label>
-
-        <label className="flex flex-col text-sm text-slate-300 lg:w-48">
-          カテゴリ
-          <div className="mt-1 flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/50 px-3">
-            <span
-              className={`text-xs font-semibold ${currentCategory?.badgeClass ?? ""}`}
-            >
-              {currentCategory?.label ?? "カテゴリ"}
-            </span>
-            <select
-              value={item.category}
+    <Card.Root variant="subtle" borderColor="blackAlpha.100">
+      <Card.Body as={Stack} spacing={4}>
+        <Stack direction={{ base: "column", lg: "row" }} spacing={4} align="flex-end">
+          <Stack w={{ base: "100%", lg: "32" }}>
+            <Text fontSize="sm" color="gray.600">
+              時間
+            </Text>
+            <Input
+              type="time"
+              value={item.time}
               onChange={(event) =>
-                onChange(item.id, {
-                  category: event.currentTarget.value as TimelineCategory,
-                })
+                onChange(item.id, { time: event.currentTarget.value })
               }
-              className="flex-1 bg-transparent py-2 text-base text-white outline-none"
-            >
-              {categoryOptions.map((option) => (
-                <option
-                  key={option.value}
-                  value={option.value}
-                  className="text-slate-900"
-                >
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </label>
-
-        <label className="flex flex-1 flex-col text-sm text-slate-300">
-          タイトル
-          <input
-            type="text"
-            value={item.title}
-            placeholder="スポット / 行き先など"
-            onChange={(event) =>
-              onChange(item.id, { title: event.currentTarget.value })
-            }
-            className="mt-1 rounded-2xl border border-white/10 bg-slate-900/50 px-3 py-2 text-base text-white outline-none focus:border-pink-300/60"
-          />
-        </label>
-      </div>
-
-      <div className="grid gap-3 lg:grid-cols-3">
-        <label className="flex flex-col text-sm text-slate-300 lg:col-span-2">
-          メモ
-          <textarea
-            rows={2}
-            value={item.memo}
-            placeholder="補足・移動手段・リンクなど"
-            onChange={(event) =>
-              onChange(item.id, { memo: event.currentTarget.value })
-            }
-            className="mt-1 rounded-2xl border border-white/10 bg-slate-900/50 px-3 py-2 text-base text-white outline-none focus:border-pink-300/60"
-          />
-        </label>
-
-        <label className="flex flex-col text-sm text-slate-300">
-          金額
-          <div className="mt-1 flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/50 px-3 py-2 text-white">
-            <span className="text-slate-400">¥</span>
-            <input
-              type="number"
-              min={0}
-              value={amountInput}
-              onChange={handleAmountChange}
-              onBlur={handleAmountBlur}
-              className="flex-1 bg-transparent text-right text-lg outline-none"
             />
-          </div>
-          {item.amount > 0 && (
-            <span className="mt-1 text-xs text-slate-400">
-              ¥{formatAmount(item.amount)}
-            </span>
-          )}
-        </label>
-      </div>
+          </Stack>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-400">
-        <div className="flex items-center gap-2">
-          <span>ID: {item.id.slice(0, 6)}</span>
-          {sortMode === "manual" && (
-            <>
-              <button
-                type="button"
-                onClick={() => onMove(item.id, "up")}
-                disabled={isFirst}
-                className="rounded-full border border-white/10 px-3 py-1 text-base text-white transition disabled:opacity-40"
-              >
-                ↑
-              </button>
-              <button
-                type="button"
-                onClick={() => onMove(item.id, "down")}
-                disabled={isLast}
-                className="rounded-full border border-white/10 px-3 py-1 text-base text-white transition disabled:opacity-40"
-              >
-                ↓
-              </button>
-            </>
-          )}
-        </div>
+          <Stack w={{ base: "100%", lg: "48" }}>
+            <Text fontSize="sm" color="gray.600">
+              カテゴリ
+            </Text>
+            <HStack
+              spacing={3}
+              border="1px solid"
+              borderColor="blackAlpha.200"
+              borderRadius="lg"
+              px={3}
+              py={2}
+            >
+              <Badge colorPalette="gray" fontSize="xs">
+                {currentCategory?.label ?? "カテゴリ"}
+              </Badge>
+              <NativeSelect.Root flex="1">
+                <NativeSelect.Field
+                  value={item.category}
+                  onChange={(event) =>
+                    onChange(item.id, {
+                      category: event.currentTarget.value as TimelineCategory,
+                    })
+                  }
+                >
+                  {categoryOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </NativeSelect.Field>
+                <NativeSelect.Indicator />
+              </NativeSelect.Root>
+            </HStack>
+          </Stack>
 
-        <button
-          type="button"
-          onClick={() => onDelete(item.id)}
-          className="rounded-full border border-red-400/50 px-4 py-1 text-sm font-semibold text-red-200 transition hover:border-red-400 hover:text-white"
+          <Stack flex="1">
+            <Text fontSize="sm" color="gray.600">
+              タイトル
+            </Text>
+            <Input
+              value={item.title}
+              placeholder="スポット / 行き先など"
+              onChange={(event) =>
+                onChange(item.id, { title: event.currentTarget.value })
+              }
+            />
+          </Stack>
+        </Stack>
+
+        <Stack gap={3} direction={{ base: "column", lg: "row" }}>
+          <Stack flex="2">
+            <Text fontSize="sm" color="gray.600">
+              メモ
+            </Text>
+            <Textarea
+              rows={2}
+              value={item.memo}
+              placeholder="補足・移動手段・リンクなど"
+              onChange={(event) =>
+                onChange(item.id, { memo: event.currentTarget.value })
+              }
+            />
+          </Stack>
+
+          <Stack flex="1">
+            <Text fontSize="sm" color="gray.600">
+              金額
+            </Text>
+            <HStack
+              border="1px solid"
+              borderColor="blackAlpha.200"
+              borderRadius="lg"
+              px={3}
+              py={2}
+              spacing={2}
+            >
+              <Text color="gray.500">¥</Text>
+              <Input
+                type="number"
+                min={0}
+                value={amountInput}
+                onChange={handleAmountChange}
+                onBlur={handleAmountBlur}
+                textAlign="right"
+              />
+            </HStack>
+            {item.amount > 0 && (
+              <Text mt={1} fontSize="xs" color="gray.500">
+                ¥{formatAmount(item.amount)}
+              </Text>
+            )}
+          </Stack>
+        </Stack>
+
+        <Flex
+          wrap="wrap"
+          align="center"
+          justify="space-between"
+          gap={3}
+          color="gray.500"
+          fontSize="sm"
         >
-          削除
-        </button>
-      </div>
-    </div>
+          <HStack spacing={3} align="center">
+            <Text>ID: {item.id.slice(0, 6)}</Text>
+            {sortMode === "manual" && (
+              <HStack spacing={2}>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  onClick={() => onMove(item.id, "up")}
+                  disabled={isFirst}
+                >
+                  ↑
+                </Button>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  onClick={() => onMove(item.id, "down")}
+                  disabled={isLast}
+                >
+                  ↓
+                </Button>
+              </HStack>
+            )}
+          </HStack>
+
+          <Button
+            size="sm"
+            variant="outline"
+            colorPalette="red"
+            onClick={() => onDelete(item.id)}
+          >
+            削除
+          </Button>
+        </Flex>
+      </Card.Body>
+    </Card.Root>
   );
 }
