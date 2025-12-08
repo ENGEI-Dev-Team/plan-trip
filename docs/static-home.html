@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TRIP-PLAN デモ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0ea5e9;
+      --secondary: #f59e0b;
+      --accent: #10b981;
+      --paper: #ffffff;
+      --subtle: #f5f5f4;
+      --text: #1f2937;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Noto Sans JP', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #fafaf9;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    img { max-width: 100%; display: block; }
+    .page { min-height: 100vh; display: flex; flex-direction: column; }
+    .hero {
+      position: relative;
+      height: 70vh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      text-align: center;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url("https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070&auto=format&fit=crop") center/cover no-repeat;
+      filter: saturate(1.05);
+      opacity: 0.8;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(28,25,23,0.35) 0%, rgba(28,25,23,0.12) 55%, #fafaf9 95%);
+    }
+    .hero__inner {
+      position: relative;
+      z-index: 1;
+      padding: 3rem 1.5rem 2rem;
+      max-width: 720px;
+      color: #fff;
+      text-shadow: 0 4px 18px rgba(0,0,0,0.32);
+    }
+    .hero__title {
+      margin: 0 0 1.2rem;
+      font-size: clamp(2.5rem, 4vw + 1rem, 3.75rem);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+    }
+    .hero__lead {
+      margin: 0 0 2rem;
+      font-size: clamp(1.05rem, 0.6vw + 1rem, 1.25rem);
+      font-weight: 500;
+      color: rgba(255,255,255,0.9);
+    }
+    .hero__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2.75rem;
+      border-radius: 999px;
+      background: #fff;
+      color: #1f2937;
+      font-weight: 700;
+      font-size: 1.05rem;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 18px 40px rgba(14,165,233,0.25);
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+    .hero__cta:hover {
+      transform: translateY(-2px) scale(1.01);
+      background: #fdfdfd;
+      box-shadow: 0 14px 30px rgba(14,165,233,0.22);
+    }
+    .section {
+      padding: clamp(2.5rem, 4vw, 4rem) 1.5rem;
+    }
+    .section--narrow { max-width: 1100px; margin: 0 auto; }
+    .badge {
+      display: inline-block;
+      padding: 0.45rem 1rem;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid #e7e5e4;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.85rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    }
+    .heading {
+      margin: 0.75rem 0 0;
+      font-size: 1.75rem;
+      color: #1f2937;
+      text-align: center;
+      font-weight: 700;
+    }
+    .steps {
+      margin-top: 2rem;
+      display: grid;
+      gap: 1rem;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #f1f1f0;
+      border-radius: 18px;
+      padding: 1.5rem;
+      box-shadow: 0 14px 40px rgba(0,0,0,0.04);
+      transition: transform 180ms ease, box-shadow 180ms ease;
+      text-align: center;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.06);
+    }
+    .card__icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 1rem;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .card__title {
+      margin: 0 0 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+    .card__desc {
+      margin: 0;
+      font-size: 0.95rem;
+      color: #6b7280;
+    }
+    .benefits {
+      margin-top: 3rem;
+      background: var(--subtle);
+      border-radius: 28px;
+      padding: clamp(1.5rem, 4vw, 3rem);
+      display: grid;
+      gap: 2rem;
+      align-items: center;
+    }
+    .benefits__title {
+      margin: 0 0 1rem;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #111827;
+      line-height: 1.3;
+    }
+    .benefits__list { margin: 0; padding: 0; list-style: none; display: grid; gap: 1rem; }
+    .benefits__item { display: grid; grid-template-columns: auto 1fr; gap: 0.75rem; align-items: flex-start; }
+    .benefits__icon {
+      width: 32px; height: 32px;
+      border-radius: 10px;
+      background: #e0f2fe;
+      display: grid; place-items: center;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .benefits__item h3 {
+      margin: 0 0 0.2rem;
+      font-size: 1.05rem;
+      color: #111827;
+    }
+    .benefits__item p {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.95rem;
+    }
+    .benefits__cta {
+      margin-top: 1.5rem;
+      padding: 0.9rem 1.4rem;
+      background: #1f2937;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 160ms ease, background 160ms ease;
+    }
+    .benefits__cta:hover {
+      transform: translateY(-1px);
+      background: #111827;
+    }
+    .benefits__image {
+      position: relative;
+      max-width: 460px;
+      justify-self: center;
+    }
+    .benefits__image figure {
+      margin: 0;
+      background: #fff;
+      border-radius: 20px;
+      padding: 0.7rem;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+      transform: rotate(3deg);
+    }
+    .label {
+      display: inline-block;
+      padding: 0.45rem 0.9rem;
+      border-radius: 10px;
+      background: #dbeafe;
+      color: #0f172a;
+      font-weight: 700;
+      font-size: 0.82rem;
+    }
+    @media (min-width: 720px) {
+      .steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4rem; }
+      .benefits { grid-template-columns: 1.1fr 0.9fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="hero__inner">
+        <p class="label" aria-hidden="true">旅のしおりを、すぐに。</p>
+        <h1 class="hero__title">旅のしおりを、<br>もっと自由に。</h1>
+        <p class="hero__lead">会員登録なしですぐに作成。旅の計画から思い出の保存まで、これひとつで。</p>
+        <button class="hero__cta">しおりを作る（無料）</button>
+      </div>
+    </header>
+
+    <section class="section section--narrow" aria-label="使い方ガイド">
+      <div style="text-align:center;">
+        <span class="badge">Easy Step</span>
+        <h2 class="heading">ログインなしで、すぐに使えます</h2>
+      </div>
+      <div class="steps" role="list">
+        <article class="card" role="listitem">
+          <div class="card__icon" style="background:#eff6ff;">1</div>
+          <h3 class="card__title">プランを作成</h3>
+          <p class="card__desc">タイトルと日程を入れるだけ。1分で準備完了です。</p>
+        </article>
+        <article class="card" role="listitem">
+          <div class="card__icon" style="background:#fff7ed;">2</div>
+          <h3 class="card__title">予定を追加</h3>
+          <p class="card__desc">観光スポットや食事など、タイムラインで自由に編集。</p>
+        </article>
+        <article class="card" role="listitem">
+          <div class="card__icon" style="background:#ecfdf3;">3</div>
+          <h3 class="card__title">共有・保存</h3>
+          <p class="card__desc">URLで友達にシェア。おしゃれな画像で保存も。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section section--narrow">
+      <div class="benefits">
+        <div>
+          <h2 class="benefits__title">ログインすると、<br>もっと便利に。</h2>
+          <ul class="benefits__list">
+            <li class="benefits__item">
+              <span class="benefits__icon">✓</span>
+              <div>
+                <h3>クラウドに保存</h3>
+                <p>作成したしおりをいつでもどこでも確認・編集できます。</p>
+              </div>
+            </li>
+            <li class="benefits__item">
+              <span class="benefits__icon">✓</span>
+              <div>
+                <h3>旅の足跡マップ</h3>
+                <p>訪れた都道府県が色付いていきます。全国制覇を目指そう。</p>
+              </div>
+            </li>
+            <li class="benefits__item">
+              <span class="benefits__icon">✓</span>
+              <div>
+                <h3>思い出のアルバム</h3>
+                <p>旅の写真を無制限に保存。いつでも見返せます。</p>
+              </div>
+            </li>
+          </ul>
+          <button class="benefits__cta">ログインして始める</button>
+        </div>
+        <div class="benefits__image">
+          <figure>
+            <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80" alt="旅の地図イメージ">
+          </figure>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
