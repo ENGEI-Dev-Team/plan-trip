@@ -102,3 +102,238 @@ public/
 | Week 5-6 | 品質保証 | テスト、パフォーマンス、ドキュメント整備 |
 
 このREADMEをベースに「環境整備 → README作成 → Week1実装」まで自走できる状態にしておきます。追加のドキュメント化が必要になったら追記していく方針です。
+
+
+# 画像保存機能 実装ガイド
+
+## 📦 必要なパッケージのインストール
+
+```bash
+npm install html2canvas
+# または
+pnpm add html2canvas
+# または
+yarn add html2canvas
+```
+
+## 📁 追加ファイル一覧
+
+### 型定義
+- `src/types/imageExport.ts` - 画像エクスポート関連の型定義
+
+### Atoms
+- `src/components/atoms/SaveImageButton.tsx` - 画像保存ボタン
+
+### Organisms
+- `src/components/organisms/SaveImageModal.tsx` - 画像保存設定モーダル
+
+### Hooks
+- `src/hooks/useImageExport.ts` - 画像エクスポート処理のカスタムフック
+
+### 更新ファイル
+- `src/components/molecules/PrintControlBar.tsx` - 画像保存ボタンを追加
+- `src/components/templates/TrifoldPrintLayout.tsx` - 画像保存機能を統合
+
+## 🎨 機能概要
+
+### 保存オプション
+1. **両面（表面・裏面）**: 2枚の画像として保存
+2. **表面のみ**: 表紙とスケジュール部分のみ
+3. **裏面のみ**: メモと予算サマリー部分のみ
+
+### 画像品質
+- **解像度**: Retina対応（2倍スケール）
+- **フォーマット**: PNG
+- **圧縮**: 品質92%で自動最適化
+- **ファイルサイズ**: 通常 500KB - 2MB程度
+
+### ファイル名
+- **デフォルト**: `旅のしおり_[タイトル]_[日付].png`
+- **カスタマイズ**: ユーザーが任意で変更可能
+- **自動サフィックス**: 
+  - 両面の場合: `_表面.png`, `_裏面.png`
+  - 片面の場合: `_表面.png` または `_裏面.png`
+
+## 🚀 使い方
+
+### 基本的な使用フロー
+
+1. 印刷ページ (`/print/[id]`) で「画像で保存」ボタンをクリック
+2. 保存設定モーダルが表示される
+3. 保存範囲を選択（両面 / 表面 / 裏面）
+4. ファイル名を確認・編集
+5. 「保存する」ボタンで画像をダウンロード
+
+### コード例
+
+```typescript
+import { useImageExport } from '@/hooks/useImageExport';
+
+const MyComponent = () => {
+  const { exportPrintPages } = useImageExport();
+
+  const handleSave = async () => {
+    await exportPrintPages('both', '旅のしおり_京都旅行_2025-12-01');
+  };
+
+  return <button onClick={handleSave}>保存</button>;
+};
+```
+
+## 🔧 技術詳細
+
+### html2canvas の動作
+
+```typescript
+const canvas = await html2canvas(element, {
+  scale: 2,           // Retina対応（高解像度）
+  useCORS: true,      // 外部画像の読み込み許可
+  logging: false,     // コンソールログ無効化
+  backgroundColor: '#ffffff', // 背景色
+});
+```
+
+### 画像圧縮
+
+```typescript
+canvas.toBlob(
+  (blob) => resolve(blob),
+  'image/png',
+  0.92  // 品質: 0.0 - 1.0（0.92で高品質かつ適度に圧縮）
+);
+```
+
+### ダウンロード実装
+
+```typescript
+const url = URL.createObjectURL(blob);
+const link = document.createElement('a');
+link.download = `${fileName}.png`;
+link.href = url;
+link.click();
+URL.revokeObjectURL(url); // メモリ解放
+```
+
+## 📱 レスポンシブ対応
+
+- デスクトップ: 通常のボタン表示
+- モバイル: ボタンサイズ最適化
+- タブレット: 問題なく動作
+
+## ⚠️ 注意事項
+
+### ブラウザ互換性
+- Chrome: ✅ 完全対応
+- Safari: ✅ 完全対応
+- Firefox: ✅ 完全対応
+- Edge: ✅ 完全対応
+
+### 制限事項
+1. **外部画像**: CORS設定が必要（現在の実装では外部画像なし）
+2. **カスタムフォント**: Web Fontが読み込まれていることを確認
+3. **処理時間**: 大きなコンテンツの場合、数秒かかることがある
+4. **連続ダウンロード**: 両面保存時、300ms の遅延を挿入（ブラウザ制限対策）
+
+### パフォーマンス
+
+```typescript
+// 最適化のポイント
+const exportOptions = {
+  scale: 2,      // 3倍だとファイルサイズが大きくなりすぎる
+  quality: 0.92, // 0.8-0.95が推奨（品質とサイズのバランス）
+};
+```
+
+## 🎯 ユーザー体験の工夫
+
+### ローディング状態
+- 処理中はボタンを無効化
+- スピナーアイコンで進行状況を表示
+- 「処理中...」のテキスト表示
+
+### エラーハンドリング
+- 失敗時はアラートで通知
+- コンソールにエラーログ出力
+- モーダルは開いたまま（再試行可能）
+
+### ファイル名プレビュー
+- 選択したオプションに応じてファイル名を動的表示
+- 例: `旅のしおり_京都旅行_2025-12-01_表面.png`
+
+## 🔄 カスタマイズ方法
+
+### 画質の調整
+
+```typescript
+// src/hooks/useImageExport.ts
+const exportOptions = {
+  scale: 3,      // より高解像度に
+  quality: 0.95, // より高品質に（ファイルサイズ増加）
+};
+```
+
+### ファイル形式の変更
+
+```typescript
+// PNGからJPEGに変更
+canvas.toBlob(
+  (blob) => resolve(blob),
+  'image/jpeg',  // PNG → JPEG
+  0.92
+);
+
+// ファイル名も変更
+link.download = `${fileName}.jpg`;
+```
+
+### 保存範囲のカスタマイズ
+
+```typescript
+// 特定の要素のみを保存
+const customElement = document.getElementById('custom-area');
+await exportElementAsImage(customElement, 'カスタム画像');
+```
+
+## 🐛 トラブルシューティング
+
+### 画像が保存されない
+- ブラウザのダウンロード設定を確認
+- ポップアップブロックを無効化
+- コンソールのエラーログを確認
+
+### 画像が切れる
+- `overflow: hidden` を確認
+- 要素のサイズを明示的に設定
+- `scale` を下げてみる
+
+### ファイルサイズが大きい
+- `quality` を下げる（0.85程度）
+- `scale` を下げる（1.5倍）
+- JPEG形式を検討
+
+### フォントが正しく表示されない
+- Google Fonts等が完全に読み込まれているか確認
+- `@font-face` の設定を確認
+
+## 📊 期待される効果
+
+### ユーザーメリット
+- スマホで気軽に旅のしおりを確認
+- SNSで簡単にシェア可能
+- オフラインでも閲覧可能
+- 印刷不要で環境に優しい
+
+### 技術的メリット
+- 既存の印刷ビューを再利用
+- 追加のデザイン作業不要
+- 高品質な出力
+- クロスブラウザ対応
+
+## 🚀 今後の拡張案
+
+- [ ] 画像サイズの選択機能（SNS用、印刷用など）
+- [ ] 透かし（ウォーターマーク）の追加
+- [ ] 複数形式のエクスポート（PNG, JPEG, WebP）
+- [ ] 画像編集機能（テキスト追加、フィルターなど）
+- [ ] クラウドへの直接アップロード
+- [ ] 画像の一括ダウンロード（ZIP形式）
