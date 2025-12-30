@@ -1,0 +1,34 @@
+src/components
+├── atoms
+│   ├── AppTag.tsx
+│   ├── AutoSaveStatusIndicator.tsx
+│   ├── CategoryBadge.tsx
+│   ├── HelpIcon.tsx
+│   ├── PrintButton.tsx
+│   └── PrintNavigationButton.tsx
+├── molecules
+│   ├── HeroHeader.tsx
+│   ├── HeroLeftSection.tsx
+│   ├── ItineraryActionBar.tsx
+│   ├── ItineraryPreview.tsx
+│   ├── PrintControlBar.tsx
+│   ├── PrintHeader.tsx
+│   └── ScheduleItem.tsx
+├── organisms
+│   ├── CreateTripCard.tsx
+│   ├── ItineraryDraftEditor.tsx
+│   ├── PlanTripHero.tsx
+│   ├── PrintCoverPage.tsx
+│   ├── PrintHelpModal.tsx
+│   ├── PrintSchedulePage.tsx
+│   └── PrintSummaryPage.tsx
+├── templates
+│   └── TrifoldPrintLayout.tsx
+└── timeline
+    ├── PeopleCounter.tsx
+    ├── SortModeToggle.tsx
+    ├── TimelineEditor.tsx
+    ├── TimelineItemRow.tsx
+    └── TimelineSummary.tsx
+
+6 directories, 26 files

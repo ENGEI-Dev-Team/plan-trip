@@ -11,9 +11,10 @@ export const PrintButton: React.FC<PrintButtonProps> = ({ onClick, className = '
   return (
     <button
       onClick={onClick}
-      className={`px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors ${className}`}
+      className={className}
+      aria-label="印刷や保存"
     >
-      印刷する
+      🖨️ 印刷 / 保存
     </button>
   );
 };

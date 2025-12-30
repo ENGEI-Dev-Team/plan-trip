@@ -9,7 +9,7 @@ interface PreviewDaySectionProps {
   schedule: DailySchedule;
   dayNumber: number;
   subtitle?: string;
-  itemImages?: Record<string, string>; // itemId -> imageUrl のマップ
+  itemImages?: Record<string, string>;
   showAmount?: boolean;
 }
 
@@ -26,22 +26,17 @@ export const PreviewDaySection: React.FC<PreviewDaySectionProps> = ({
   };
 
   return (
-    <section className="mb-12">
-      {/* 日付ヘッダー */}
-      <div className="flex items-center gap-3.5 mb-4">
+    <section className="day">
+      <div className="day-head">
         <DayBadge day={dayNumber} />
         <div>
-          <h2 className="text-xl font-semibold mb-0 border-b-2 border-sky-500/30 inline-block pb-1">
-            {formatDate(schedule.date)}
-          </h2>
+          <h2>{formatDate(schedule.date)}</h2>
           {subtitle && (
-            <div className="text-gray-400 text-sm mt-1">{subtitle}</div>
+            <div style={{ color: '#9ca3af', fontSize: '0.9rem' }}>{subtitle}</div>
           )}
         </div>
       </div>
-      
-      {/* タイムライン */}
-      <div className="relative pl-8 border-l-2 border-dotted border-gray-300 ml-3.5">
+      <div className="timeline">
         {schedule.items.map((item) => (
           <TimelineEntry 
             key={item.id}

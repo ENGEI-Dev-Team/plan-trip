@@ -21,25 +21,12 @@ export const PreviewCoverSection: React.FC<PreviewCoverSectionProps> = ({
   };
 
   return (
-    <div className="relative h-64 bg-gray-200">
-      <img 
-        src={imageUrl} 
-        alt={basicInfo.title}
-        className="w-full h-full object-cover"
-        style={{ filter: 'saturate(1.05)' }}
-      />
-      <div 
-        className="absolute inset-0"
-        style={{
-          background: 'linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 60%, transparent 100%)'
-        }}
-      />
-      <div className="absolute bottom-6 left-6 text-white" style={{ textShadow: '0 4px 20px rgba(0,0,0,0.35)' }}>
-        <span className="inline-block px-2.5 py-1.5 rounded-full bg-white/20 border border-white/35 font-bold text-sm mb-1.5">
-          {basicInfo.prefecture}
-        </span>
-        <h1 className="my-1.5 text-4xl font-bold tracking-wide">{basicInfo.title}</h1>
-        <div className="text-sm">{formatDateRange()} / {memberCount}名</div>
+    <div className="cover">
+      <img src={imageUrl} alt={basicInfo.title} />
+      <div className="cover-text">
+        <span className="chip">{basicInfo.prefecture}</span>
+        <h1>{basicInfo.title}</h1>
+        <div>{formatDateRange()} / {memberCount}名</div>
       </div>
     </div>
   );
