@@ -2,7 +2,6 @@ import { useState, type ChangeEvent } from "react";
 import {
   Badge,
   Button,
-  Card,
   Flex,
   HStack,
   Input,
