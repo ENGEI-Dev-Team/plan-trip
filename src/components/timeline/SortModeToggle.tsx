@@ -1,4 +1,4 @@
-import { Card, Grid, Text } from "@chakra-ui/react";
+import { Card, Grid, Text, Box } from "@chakra-ui/react";
 import { SortMode } from "@/types/timeline";
 
 interface SortModeToggleProps {
@@ -8,19 +8,34 @@ interface SortModeToggleProps {
 
 const modes: { value: SortMode; label: string; description: string }[] = [
   { value: "time", label: "時間順ソート", description: "時刻を基準に自動整列" },
-  { value: "manual", label: "手動並び替え", description: "上下ボタンで順番を制御" },
+  {
+    value: "manual",
+    label: "手動並び替え",
+    description: "上下ボタンで順番を制御",
+  },
 ];
 
-export default function SortModeToggle({ value, onChange }: SortModeToggleProps) {
+export default function SortModeToggle({
+  value,
+  onChange,
+}: SortModeToggleProps) {
   return (
     <Card.Root variant="subtle">
-      <Card.Body>
-        <Text fontSize="xs" textTransform="uppercase" letterSpacing="0.3em" color="gray.400">
+      {/* Card.Body の余白を詰める */}
+      <Card.Body p={3}>
+        <Text fontSize="xs" letterSpacing="0.2em" color="gray.500">
           並び順モード
         </Text>
-        <Grid gap={3} mt={3} templateColumns={{ base: "1fr", sm: "repeat(2, minmax(0, 1fr))" }}>
+
+        {/* gap/mt を小さく */}
+        <Grid
+          gap={2}
+          mt={2}
+          templateColumns={{ base: "1fr", sm: "repeat(2, minmax(0, 1fr))" }}
+        >
           {modes.map((mode) => {
             const active = value === mode.value;
+
             return (
               <Card.Root
                 key={mode.value}
@@ -32,14 +47,28 @@ export default function SortModeToggle({ value, onChange }: SortModeToggleProps)
                 transition="all 0.15s ease"
                 _hover={{
                   borderColor: "pink.200",
-                  boxShadow: "0 10px 25px rgba(244, 114, 182, 0.15)",
+                  boxShadow: "0 10px 25px rgba(244, 114, 182, 0.12)",
                 }}
               >
-                <Card.Body>
-                  <Text fontWeight="semibold" color="gray.800">
+                {/* カード側も余白削る */}
+                <Card.Body p={3}>
+                  <Text
+                    fontSize="sm"
+                    fontWeight="semibold"
+                    color="gray.800"
+                    lineHeight="1.2"
+                  >
                     {mode.label}
                   </Text>
-                  <Text fontSize="sm" color="gray.500">
+
+                  {/* description を1行で省スペース */}
+                  <Text
+                    fontSize="xs"
+                    color="gray.500"
+                    mt={1}
+                    lineHeight="1.2"
+                    lineClamp={1}
+                  >
                     {mode.description}
                   </Text>
                 </Card.Body>

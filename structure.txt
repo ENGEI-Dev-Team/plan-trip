@@ -1,34 +1,73 @@
-src/components
-├── atoms
-│   ├── AppTag.tsx
-│   ├── AutoSaveStatusIndicator.tsx
-│   ├── CategoryBadge.tsx
-│   ├── HelpIcon.tsx
-│   ├── PrintButton.tsx
-│   └── PrintNavigationButton.tsx
-├── molecules
-│   ├── HeroHeader.tsx
-│   ├── HeroLeftSection.tsx
-│   ├── ItineraryActionBar.tsx
-│   ├── ItineraryPreview.tsx
-│   ├── PrintControlBar.tsx
-│   ├── PrintHeader.tsx
-│   └── ScheduleItem.tsx
-├── organisms
-│   ├── CreateTripCard.tsx
-│   ├── ItineraryDraftEditor.tsx
-│   ├── PlanTripHero.tsx
-│   ├── PrintCoverPage.tsx
-│   ├── PrintHelpModal.tsx
-│   ├── PrintSchedulePage.tsx
-│   └── PrintSummaryPage.tsx
-├── templates
-│   └── TrifoldPrintLayout.tsx
-└── timeline
-    ├── PeopleCounter.tsx
-    ├── SortModeToggle.tsx
-    ├── TimelineEditor.tsx
-    ├── TimelineItemRow.tsx
-    └── TimelineSummary.tsx
+src
+├── app
+│   ├── ChakraProviderWrapper.tsx
+│   ├── edit
+│   │   └── [id]
+│   │       └── page.tsx
+│   ├── favicon.ico
+│   ├── globals.css
+│   ├── layout.tsx
+│   ├── mypage
+│   │   └── page.tsx
+│   ├── page.tsx
+│   ├── print
+│   │   └── [id]
+│   │       └── page.tsx
+│   └── share
+│       └── [id]
+│           └── page.tsx
+├── components
+│   ├── atoms
+│   │   ├── AppTag.tsx
+│   │   ├── AutoSaveStatusIndicator.tsx
+│   │   ├── CategoryBadge.tsx
+│   │   ├── HelpIcon.tsx
+│   │   ├── PrintButton.tsx
+│   │   └── PrintNavigationButton.tsx
+│   ├── molecules
+│   │   ├── HeroHeader.tsx
+│   │   ├── HeroLeftSection.tsx
+│   │   ├── home
+│   │   │   ├── HomeBenefits.tsx
+│   │   │   ├── HomeHero.tsx
+│   │   │   └── HomeSteps.tsx
+│   │   ├── ItineraryActionBar.tsx
+│   │   ├── ItineraryPreview.tsx
+│   │   ├── PrintControlBar.tsx
+│   │   ├── PrintHeader.tsx
+│   │   └── ScheduleItem.tsx
+│   ├── organisms
+│   │   ├── CreateTripCard.tsx
+│   │   ├── ItineraryDraftEditor.tsx
+│   │   ├── PlanTripHero.tsx
+│   │   ├── PrintCoverPage.tsx
+│   │   ├── PrintHelpModal.tsx
+│   │   ├── PrintSchedulePage.tsx
+│   │   └── PrintSummaryPage.tsx
+│   ├── templates
+│   │   └── TrifoldPrintLayout.tsx
+│   └── timeline
+│       ├── PeopleCounter.tsx
+│       ├── SortModeToggle.tsx
+│       ├── TimelineEditor.tsx
+│       ├── TimelineItemRow.tsx
+│       └── TimelineSummary.tsx
+├── hooks
+│   ├── useAutoSave.ts
+│   ├── useCreateTrip.ts
+│   └── usePrint.ts
+├── lib
+│   ├── api
+│   │   └── trip.ts
+│   └── validation
+│       └── trip.ts
+├── tests
+├── types
+│   ├── itinerary.ts
+│   ├── itinerory.ts
+│   ├── timeline.ts
+│   └── trip.ts
+└── utils
+    └── cookie.ts
 
-6 directories, 26 files
+23 directories, 48 files
