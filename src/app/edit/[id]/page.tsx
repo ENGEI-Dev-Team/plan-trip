@@ -1,19 +1,13 @@
-
 "use client";
 
-import {
-  Badge,
-  Box,
-  Button,
-  Container,
-  Flex,
-  Heading,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Button, Flex, Text } from "@chakra-ui/react";
 import { useParams, useRouter } from "next/navigation";
 import { PrintNavigationButton } from "@/components/atoms/PrintNavigationButton";
 import TimelineEditor from "@/components/timeline/TimelineEditor";
+
+
+const PRIMARY = "#0ea5e9";
+
 
 export default function EditPage() {
   const params = useParams();
@@ -21,66 +15,66 @@ export default function EditPage() {
   const router = useRouter();
 
   return (
-    <Box bg="gray.50" minH="100vh" py={{ base: 10, md: 14 }}>
-      <Container maxW="6xl">
-        <Stack
-          spacing={6}
-          borderRadius="2xl"
-          border="1px solid"
-          borderColor="blackAlpha.100"
-          bg="white"
-          boxShadow="0 18px 40px rgba(15, 23, 42, 0.08)"
-          p={{ base: 6, md: 8 }}
+    <Flex direction="column" h="100vh" bg="#f8f8f7" color="#1f2937">
+      {/* sticky header */}
+      <Flex
+        as="header"
+        position="sticky"
+        top={0}
+        zIndex={10}
+        bg="rgba(255,255,255,0.92)"
+        backdropFilter="blur(8px)"
+        borderBottom="1px solid"
+        borderColor="#e5e7eb"
+        px={{ base: 3, md: 5 }}
+        py={2}
+        align="center"
+        justify="space-between"
+        boxShadow="0 2px 14px rgba(0,0,0,0.04)"
+        gap={3}
+      >
+        <Button
+          size="sm"
+          variant="solid"
+          bg="#f3f4f6"
+          color="#374151"
+          borderRadius="full"
+          _hover={{ bg: "#e5e7eb" }}
+          onClick={() => router.push("/")}
         >
-          <Flex
-            direction={{ base: "column", md: "row" }}
-            align={{ base: "flex-start", md: "center" }}
-            justify="space-between"
-            gap={4}
-          >
-            <Stack spacing={2}>
-              <Badge
-                variant="subtle"
-                colorPalette="teal"
-                alignSelf="flex-start"
-              >
-                Editing
-              </Badge>
-              <Heading size="lg" color="gray.800">
-                旅のタイムラインを編集
-              </Heading>
-              <Text color="gray.600">
-                時間順/任意順の切り替えや費用集計、自動保存を使ってしおりを整えましょう。
-              </Text>
-              <Text fontSize="sm" color="gray.500">
-                プレビューや共有が必要になったら右上の印刷ボタンから確認できます。
-              </Text>
-            </Stack>
-            <Flex gap={3} align="center">
-              <Button
-                variant="ghost"
-                onClick={() => router.push("/")}
-                size="sm"
-              >
-                ホームへ戻る
-              </Button>
-              <PrintNavigationButton itineraryId={itineraryId} />
-            </Flex>
-          </Flex>
+          ← ホームへ
+        </Button>
 
+        <Box minW={0} flex={1}>
+          <Text fontWeight="700" fontSize="md" noOfLines={1}>
+            旅のタイムラインを編集
+          </Text>
+          <Text color="#6b7280" fontSize="sm" noOfLines={1}>
+            ID: {itineraryId.slice(0, 8)}…
+          </Text>
+        </Box>
+
+        <Flex align="center" gap={2}>
           <Box
-            borderRadius="xl"
-            border="1px solid"
-            borderColor="blackAlpha.100"
-            bg="gray.900"
-            color="white"
-            px={{ base: 4, md: 6 }}
-            py={{ base: 5, md: 6 }}
+            px={3}
+            py={1}
+            borderRadius="full"
+            bg="rgba(14,165,233,0.1)"
+            color={PRIMARY}
+            fontWeight="800"
+            fontSize="sm"
+            whiteSpace="nowrap"
           >
-            <TimelineEditor />
+            Editing
           </Box>
-        </Stack>
-      </Container>
-    </Box>
+          <PrintNavigationButton itineraryId={itineraryId} />
+        </Flex>
+      </Flex>
+
+      {/* content */}
+      <Box flex={1} minH={0}>
+        <TimelineEditor />
+      </Box>
+    </Flex>
   );
 }

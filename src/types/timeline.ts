@@ -17,4 +17,5 @@ export interface TimelineItem {
   memo: string;
   amount: number;
   orderIndex: number;
+  photoUrl?: string;
 }
