@@ -1,13 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Box, Button, Flex, Text } from "@chakra-ui/react";
 import { useParams, useRouter } from "next/navigation";
 import { PrintNavigationButton } from "@/components/atoms/PrintNavigationButton";
-import TimelineEditor from "@/components/timeline/TimelineEditor";
 
-
-const PRIMARY = "#0ea5e9";
-
+const TimelineEditor = dynamic(
+  () => import("@/components/timeline/TimelineEditor"),
+  { ssr: false }
+);
 
 export default function EditPage() {
   const params = useParams();
@@ -16,7 +17,6 @@ export default function EditPage() {
 
   return (
     <Flex direction="column" h="100vh" bg="#f8f8f7" color="#1f2937">
-      {/* sticky header */}
       <Flex
         as="header"
         position="sticky"
@@ -35,7 +35,6 @@ export default function EditPage() {
       >
         <Button
           size="sm"
-          variant="solid"
           bg="#f3f4f6"
           color="#374151"
           borderRadius="full"
@@ -45,12 +44,19 @@ export default function EditPage() {
           ← ホームへ
         </Button>
 
-        <Box minW={0} flex={1}>
-          <Text fontWeight="700" fontSize="md" noOfLines={1}>
-            旅のタイムラインを編集
+        <Box
+          position="absolute"
+          left={0}
+          right={0}
+          textAlign="center"
+          pointerEvents="none"
+          px={{ base: 14, md: 20 }}
+        >
+          <Text fontWeight="800" fontSize="md" lineHeight="1.1">
+            京都紅葉めぐり
           </Text>
-          <Text color="#6b7280" fontSize="sm" noOfLines={1}>
-            ID: {itineraryId.slice(0, 8)}…
+          <Text color="#6b7280" fontSize="sm" lineHeight="1.1">
+            2023-11-20 〜 2023-11-21
           </Text>
         </Box>
 
@@ -59,19 +65,18 @@ export default function EditPage() {
             px={3}
             py={1}
             borderRadius="full"
-            bg="rgba(14,165,233,0.1)"
-            color={PRIMARY}
+            bg="#e0f2fe"
+            color="#0369a1"
             fontWeight="800"
             fontSize="sm"
             whiteSpace="nowrap"
           >
-            Editing
+            京都府
           </Box>
           <PrintNavigationButton itineraryId={itineraryId} />
         </Flex>
       </Flex>
 
-      {/* content */}
       <Box flex={1} minH={0}>
         <TimelineEditor />
       </Box>

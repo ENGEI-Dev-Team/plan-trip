@@ -17,8 +17,6 @@ import TimelineItemRow from "./TimelineItemRow";
 import TimelineSummary from "./TimelineSummary";
 import { TripAlbumCard } from "@/components/molecules/TripAlbumCard";
 import { UsefulToolsCard } from "@/components/molecules/UsefulToolsCard";
-import dynamic from 'next/dynamic';
-import { useIsClient } from "@/hooks/useIsClient";
 
 const PRIMARY = "#0ea5e9";
 const TIMELINE_STORAGE_KEY = "tripbook.timeline-items.v1";
@@ -165,6 +163,35 @@ const timeToMinutes = (value: string) => {
   return hours * 60 + mins;
 };
 
+type DayTab = { label: string; dateISO: string; dateLabel: string };
+
+function buildDayTabs(startISO: string, endISO: string): DayTab[] {
+  const s = new Date(startISO);
+  const e = new Date(endISO);
+  if (Number.isNaN(s.getTime()) || Number.isNaN(e.getTime())) return [];
+  if (e < s) return [];
+
+  const tabs: DayTab[] = [];
+  const cur = new Date(s);
+  let i = 0;
+
+  while (cur <= e) {
+    const yyyy = cur.getFullYear();
+    const mm = String(cur.getMonth() + 1).padStart(2, "0");
+    const dd = String(cur.getDate()).padStart(2, "0");
+    const iso = `${yyyy}-${mm}-${dd}`;
+    const label = `${i + 1}日目`;
+    const dateLabel = `${mm}/${dd}`;
+
+    tabs.push({ label, dateISO: iso, dateLabel });
+
+    cur.setDate(cur.getDate() + 1);
+    i++;
+  }
+
+  return tabs;
+}
+
 const loadInitialItems = (): TimelineItem[] => {
   if (typeof window === "undefined") return DEFAULT_ITEMS;
   try {
@@ -193,7 +220,6 @@ export default function TimelineEditor() {
   const params = useParams();
   const itineraryId = params.id as string;
   const router = useRouter();
-  const isClient = useIsClient();
   const [isDesktop, showLine] = useMediaQuery(
     ["(min-width: 961px)", "(min-width: 880px)"],
     { fallback: [false, false] },
@@ -203,9 +229,29 @@ export default function TimelineEditor() {
   const [peopleCount, setPeopleCount] = useState<number>(2);
   const [albumPhotos, setAlbumPhotos] = useState<string[]>([]);
   const [sortMode, setSortMode] = useState<SortMode>("time");
-  const [activeDay, setActiveDay] = useState(0);
-  const dayTabs = [{ label: "1日目" }, { label: "2日目" }, { label: "3日目" }];
   const didHydrateRef = useRef(false);
+
+  // 期間（いったん仮で固定。あとでヘッダーの入力と連動させる）
+  const [startDate, setStartDate] = useState("2023-11-20");
+  const [endDate, setEndDate] = useState("2023-11-21");
+
+  // DayTabs と activeDay
+  const dayTabs = useMemo(
+    () => buildDayTabs(startDate, endDate),
+    [startDate, endDate],
+  );
+  const safeDayTabs = dayTabs.length
+    ? dayTabs
+    : [{ label: "1日目", dateISO: startDate, dateLabel: "--/--" }];
+
+  const [activeDay, setActiveDay] = useState(0);
+
+  // 期間が短くなって activeDay がはみ出た時の保険
+  useEffect(() => {
+    if (activeDay > safeDayTabs.length - 1) {
+      setActiveDay(0);
+    }
+  }, [activeDay, safeDayTabs.length]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -218,6 +264,7 @@ export default function TimelineEditor() {
             ...it,
             photoUrl: it.photoUrl ?? "",
           }));
+          setItems(normalized);
         }
       }
     } catch {}
@@ -346,27 +393,26 @@ export default function TimelineEditor() {
             bg="rgba(250,250,249,0.85)"
             borderBottom="1px solid #f1f1f0"
           >
-            {dayTabs.map((t, idx) => {
+            {safeDayTabs.map((t, idx) => {
               const active = idx === activeDay;
               return (
                 <Button
-                  key={t.label}
+                  key={t.dateISO}
                   size="sm"
                   borderRadius="full"
                   border="1px solid"
                   borderColor={active ? "transparent" : "#e5e7eb"}
                   bg={active ? PRIMARY : "white"}
                   color={active ? "white" : "#6b7280"}
-                  boxShadow={
-                    active ? "0 10px 24px rgba(14,165,233,0.26)" : "none"
-                  }
+                  boxShadow={active ? "0 10px 24px rgba(14,165,233,0.26)" : "none"}
                   onClick={() => setActiveDay(idx)}
                   flexShrink={0}
                 >
-                  {t.label}
+                  {t.label}（{t.dateLabel}）
                 </Button>
               );
             })}
+
           </HStack>
 
           {/* tools */}
