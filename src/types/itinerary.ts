@@ -1,4 +1,11 @@
-export type Category = '移動' | '食事' | '観光' | '宿' | '体験' | '買い物' | 'その他';
+export type Category =
+  | "移動"
+  | "食事"
+  | "観光"
+  | "宿"
+  | "体験"
+  | "買い物"
+  | "その他";
 
 export interface ItineraryItem {
   id: string;
@@ -29,5 +36,5 @@ export interface ItineraryData {
 export interface PrintSettings {
   showAmount: boolean;
   showMemo: boolean;
-  fontSize: 'small' | 'medium' | 'large';
+  fontSize: "small" | "medium" | "large";
 }

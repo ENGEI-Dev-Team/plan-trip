@@ -1,6 +1,14 @@
 "use client";
 
-import { Box, Button, Heading, HStack, Stack, Text, Image } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Heading,
+  HStack,
+  Stack,
+  Text,
+  Image,
+} from "@chakra-ui/react";
 
 type HomeBenefitsProps = {
   onLoginClick?: () => void;
@@ -107,7 +115,7 @@ export const HomeBenefits = ({ onLoginClick }: HomeBenefitsProps) => {
                 src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80"
                 alt="旅の地図イメージ"
                 borderRadius="14px"
-            />
+              />
             </Box>
           </Box>
         </Box>

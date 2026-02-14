@@ -48,7 +48,9 @@ export function UsefulToolsCard({
             borderColor="#e5e7eb"
             color="#374151"
             _hover={{ bg: "#f1f5f9" }}
-            onClick={onCreateShareLink ?? (() => alert("共有リンクを作成（仮）"))}
+            onClick={
+              onCreateShareLink ?? (() => alert("共有リンクを作成（仮）"))
+            }
           >
             共有リンクを作成
           </Button>

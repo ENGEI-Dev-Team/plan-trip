@@ -1,7 +1,6 @@
+"use client";
 
-'use client';
-
-import { useCallback } from 'react';
+import { useCallback } from "react";
 
 export const usePrint = () => {
   const handlePrint = useCallback(() => {

@@ -22,7 +22,6 @@ export default function Home() {
           console.log("login CTA");
         }}
       />
-
       <Dialog.Root
         open={open}
         onOpenChange={(details) => setOpen(details.open)}

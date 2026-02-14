@@ -1,8 +1,7 @@
-
-import React from 'react';
-import { DailySchedule } from '@/types/itinerary';
-import { PrintHeader } from '../molecules/PrintHeader';
-import { ScheduleItem } from '../molecules/ScheduleItem';
+import React from "react";
+import { DailySchedule } from "@/types/itinerary";
+import { PrintHeader } from "../molecules/PrintHeader";
+import { ScheduleItem } from "../molecules/ScheduleItem";
 
 interface PrintSchedulePageProps {
   schedule: DailySchedule;
@@ -10,14 +9,14 @@ interface PrintSchedulePageProps {
   showMemo?: boolean;
 }
 
-export const PrintSchedulePage: React.FC<PrintSchedulePageProps> = ({ 
-  schedule, 
+export const PrintSchedulePage: React.FC<PrintSchedulePageProps> = ({
+  schedule,
   showAmount = true,
-  showMemo = true 
+  showMemo = true,
 }) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    const days = ['日', '月', '火', '水', '木', '金', '土'];
+    const days = ["日", "月", "火", "水", "木", "金", "土"];
     return `${date.getMonth() + 1}月${date.getDate()}日(${days[date.getDay()]})`;
   };
 
@@ -26,9 +25,9 @@ export const PrintSchedulePage: React.FC<PrintSchedulePageProps> = ({
       <PrintHeader title={formatDate(schedule.date)} />
       <div className="space-y-1">
         {schedule.items.map((item) => (
-          <ScheduleItem 
-            key={item.id} 
-            item={item} 
+          <ScheduleItem
+            key={item.id}
+            item={item}
             showAmount={showAmount}
             showMemo={showMemo}
           />

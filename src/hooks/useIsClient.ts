@@ -3,9 +3,9 @@
 import { useSyncExternalStore } from "react";
 
 export function useIsClient() {
-return useSyncExternalStore(
+  return useSyncExternalStore(
     () => () => {},
     () => true, // client
     () => false, // server
-);
+  );
 }

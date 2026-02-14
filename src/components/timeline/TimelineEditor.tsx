@@ -1,28 +1,30 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
   Button,
   Flex,
-  HStack,
   Stack,
   Text,
   useMediaQuery,
 } from "@chakra-ui/react";
 import { useParams, useRouter } from "next/navigation";
 import { SortMode, TimelineCategory, TimelineItem } from "@/types/timeline";
+import type { ItineraryPublishArgs } from "@/types/publish";
 import SortModeToggle from "./SortModeToggle";
+import TimelineDayTabs from "./TimelineDayTabs";
 import TimelineItemRow from "./TimelineItemRow";
-import TimelineSummary from "./TimelineSummary";
+import BudgetSummaryCard from "./BudgetSummaryCard";
+import PublishShareActions from "./PublishShareActions";
 import { TripAlbumCard } from "@/components/molecules/TripAlbumCard";
 import { UsefulToolsCard } from "@/components/molecules/UsefulToolsCard";
-import dynamic from 'next/dynamic';
-import { useIsClient } from "@/hooks/useIsClient";
+import { SaveStatusToast } from "@/components/molecules/SaveStatusToast";
 
 const PRIMARY = "#0ea5e9";
-const TIMELINE_STORAGE_KEY = "tripbook.timeline-items.v1";
-const PEOPLE_STORAGE_KEY = "tripbook.people-count.v1";
+const TIMELINE_STORAGE_KEY_PREFIX = "tripbook.timeline-items.v1";
+const PEOPLE_STORAGE_KEY_PREFIX = "tripbook.people-count.v1";
+const PUBLISH_ARGS_KEY_PREFIX = "tripbook.publish-args.v1";
 
 const CATEGORY_META: Record<
   TimelineCategory,
@@ -118,11 +120,11 @@ const DEFAULT_ITEMS: TimelineItem[] = [
   },
 ];
 
-const loadItemsFromStorage = (): TimelineItem[] => {
+const loadItemsFromStorage = (storageKey: string): TimelineItem[] => {
   if (typeof window === "undefined") return DEFAULT_ITEMS;
 
   try {
-    const stored = window.localStorage.getItem(TIMELINE_STORAGE_KEY);
+    const stored = window.localStorage.getItem(storageKey);
     if (!stored) return DEFAULT_ITEMS;
 
     const parsed = JSON.parse(stored);
@@ -165,22 +167,10 @@ const timeToMinutes = (value: string) => {
   return hours * 60 + mins;
 };
 
-const loadInitialItems = (): TimelineItem[] => {
-  if (typeof window === "undefined") return DEFAULT_ITEMS;
-  try {
-    const stored = window.localStorage.getItem(TIMELINE_STORAGE_KEY);
-    if (!stored) return DEFAULT_ITEMS;
-    const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? (parsed as TimelineItem[]) : DEFAULT_ITEMS;
-  } catch {
-    return DEFAULT_ITEMS;
-  }
-};
-
-const loadInitialPeople = (): number => {
+const loadInitialPeople = (storageKey: string): number => {
   if (typeof window === "undefined") return 2;
   try {
-    const saved = window.localStorage.getItem(PEOPLE_STORAGE_KEY);
+    const saved = window.localStorage.getItem(storageKey);
     if (!saved) return 2;
     const parsed = Number(saved);
     return !Number.isNaN(parsed) && parsed > 0 ? parsed : 2;
@@ -193,28 +183,39 @@ export default function TimelineEditor() {
   const params = useParams();
   const itineraryId = params.id as string;
   const router = useRouter();
-  const isClient = useIsClient();
+  const timelineStorageKey = `${TIMELINE_STORAGE_KEY_PREFIX}.${itineraryId}`;
+  const peopleStorageKey = `${PEOPLE_STORAGE_KEY_PREFIX}.${itineraryId}`;
+  const publishArgsKey = `${PUBLISH_ARGS_KEY_PREFIX}.${itineraryId}`;
   const [isDesktop, showLine] = useMediaQuery(
     ["(min-width: 961px)", "(min-width: 880px)"],
     { fallback: [false, false] },
   );
 
-  const [items, setItems] = useState<TimelineItem[]>(loadItemsFromStorage);
-  const [peopleCount, setPeopleCount] = useState<number>(2);
+  const [items, setItems] = useState<TimelineItem[]>(() =>
+    loadItemsFromStorage(timelineStorageKey),
+  );
+  const [peopleCount, setPeopleCount] = useState<number>(() =>
+    loadInitialPeople(peopleStorageKey),
+  );
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const [shareLinkId, setShareLinkId] = useState<string | null>(null);
+  const [showSaveNotice, setShowSaveNotice] = useState(false);
+  const [noticeType, setNoticeType] = useState<"success" | "error">("success");
   const [albumPhotos, setAlbumPhotos] = useState<string[]>([]);
   const [sortMode, setSortMode] = useState<SortMode>("time");
   const [activeDay, setActiveDay] = useState(0);
-  const dayTabs = [{ label: "1日目" }, { label: "2日目" }, { label: "3日目" }];
+  const dayTabs = ["1日目", "2日目", "3日目"];
   const didHydrateRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      const stored = window.localStorage.getItem(TIMELINE_STORAGE_KEY);
+      const stored = window.localStorage.getItem(timelineStorageKey);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          const normalized = (parsed as TimelineItem[]).map((it) => ({
+          (parsed as TimelineItem[]).map((it) => ({
             ...it,
             photoUrl: it.photoUrl ?? "",
           }));
@@ -223,7 +224,7 @@ export default function TimelineEditor() {
     } catch {}
 
     try {
-      const saved = window.localStorage.getItem(PEOPLE_STORAGE_KEY);
+      const saved = window.localStorage.getItem(peopleStorageKey);
       if (saved) {
         const parsed = Number(saved);
         if (!Number.isNaN(parsed) && parsed > 0) setPeopleCount(parsed);
@@ -231,19 +232,84 @@ export default function TimelineEditor() {
     } catch {}
 
     didHydrateRef.current = true;
-  }, []);
+  }, [timelineStorageKey, peopleStorageKey]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!didHydrateRef.current) return; // 初回読み込み前に保存しない
-    window.localStorage.setItem(TIMELINE_STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+    window.localStorage.setItem(timelineStorageKey, JSON.stringify(items));
+  }, [items, timelineStorageKey]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!didHydrateRef.current) return;
-    window.localStorage.setItem(PEOPLE_STORAGE_KEY, String(peopleCount));
-  }, [peopleCount]);
+    window.localStorage.setItem(peopleStorageKey, String(peopleCount));
+  }, [peopleCount, peopleStorageKey]);
+
+  const handlePublishShare = useCallback(async () => {
+    setIsPublishing(true);
+    setPublishError(null);
+
+    try {
+      const storedArgsRaw = window.localStorage.getItem(publishArgsKey);
+      const storedArgs = storedArgsRaw
+        ? (JSON.parse(storedArgsRaw) as Partial<ItineraryPublishArgs>)
+        : null;
+      const mergedArgs: ItineraryPublishArgs = {
+        itinerary_id: itineraryId,
+        title: storedArgs?.title ?? "",
+        pref_code: storedArgs?.pref_code ?? "",
+        start_date: storedArgs?.start_date ?? "",
+        end_date: storedArgs?.end_date ?? "",
+        people_count: storedArgs?.people_count ?? peopleCount,
+        items,
+      };
+      console.log("[publish] merged defaultValues + items", mergedArgs);
+      window.localStorage.setItem(publishArgsKey, JSON.stringify(mergedArgs));
+
+      const response = await fetch(`/api/itineraries/${itineraryId}/publish`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(mergedArgs),
+      });
+      console.log("[publish] response status", response.status);
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        console.log("[publish] response error payload", data);
+        throw new Error(data?.error ?? "共有リンク作成に失敗しました");
+      }
+      const data = await response.json();
+      console.log("[publish] response success payload", data);
+      setShareLinkId(data.id ?? null);
+      setNoticeType("success");
+      setShowSaveNotice(true);
+    } catch (error) {
+      setPublishError(
+        error instanceof Error ? error.message : "共有リンク作成に失敗しました",
+      );
+      setNoticeType("error");
+      setShowSaveNotice(true);
+    } finally {
+      setIsPublishing(false);
+    }
+  }, [items, itineraryId, peopleCount, publishArgsKey]);
+
+  useEffect(() => {
+    const handleTestSave = () => {
+      void handlePublishShare();
+    };
+    window.addEventListener("tripbook:test-save", handleTestSave);
+    return () =>
+      window.removeEventListener("tripbook:test-save", handleTestSave);
+  }, [handlePublishShare]);
+
+  useEffect(() => {
+    if (!showSaveNotice) return;
+    const timer = window.setTimeout(() => {
+      setShowSaveNotice(false);
+    }, 2800);
+    return () => window.clearTimeout(timer);
+  }, [showSaveNotice]);
 
   const sortedItems = useMemo(() => {
     const cloned = [...items];
@@ -324,6 +390,7 @@ export default function TimelineEditor() {
 
   return (
     <>
+      <SaveStatusToast visible={showSaveNotice} type={noticeType} />
       <Box
         h="100%"
         display="grid"
@@ -337,37 +404,11 @@ export default function TimelineEditor() {
           bg="#fdfdfc"
           borderRight={isDesktop ? "1px solid #f1f1f0" : "none"}
         >
-          {/* Day tabs */}
-          <HStack
-            px={4}
-            py={3}
-            gap={2} // ✅ v3はspacingではなくgap
-            overflowX="auto"
-            bg="rgba(250,250,249,0.85)"
-            borderBottom="1px solid #f1f1f0"
-          >
-            {dayTabs.map((t, idx) => {
-              const active = idx === activeDay;
-              return (
-                <Button
-                  key={t.label}
-                  size="sm"
-                  borderRadius="full"
-                  border="1px solid"
-                  borderColor={active ? "transparent" : "#e5e7eb"}
-                  bg={active ? PRIMARY : "white"}
-                  color={active ? "white" : "#6b7280"}
-                  boxShadow={
-                    active ? "0 10px 24px rgba(14,165,233,0.26)" : "none"
-                  }
-                  onClick={() => setActiveDay(idx)}
-                  flexShrink={0}
-                >
-                  {t.label}
-                </Button>
-              );
-            })}
-          </HStack>
+          <TimelineDayTabs
+            labels={dayTabs}
+            activeDay={activeDay}
+            onChange={setActiveDay}
+          />
 
           {/* tools */}
           <Box
@@ -440,49 +481,7 @@ export default function TimelineEditor() {
             {/* モバイル時は左下にも予算サマリー */}
             {!isDesktop && (
               <Box mt={4}>
-                <Box
-                  bg="white"
-                  border="1px solid #f1f1f0"
-                  borderRadius="14px"
-                  p={4}
-                  boxShadow="0 8px 20px rgba(0,0,0,0.04)"
-                >
-                  <Text fontWeight="700" fontSize="sm" mb={2} color="#111827">
-                    予算サマリー
-                  </Text>
-                  <TimelineSummary
-                    categoryTotals={categoryTotals}
-                    totalAmount={totalAmount}
-                    perPersonAmount={perPersonAmount}
-                    peopleCount={peopleCount}
-                    onPeopleChange={setPeopleCount}
-                    categoryMeta={SUMMARY_CATEGORY_META}
-                  />
-                </Box>
-              </Box>
-            )}
-
-            <Text mt={6} fontSize="xs" color="#6b7280">
-              入力内容はブラウザのローカル（localStorage）に保存されます。
-            </Text>
-          </Box>
-        </Flex>
-
-        {/* Right sidebar：デスクトップのみ */}
-        {isDesktop && (
-          <Box bg="white" p={4} overflow="auto" minH={0}>
-            <Stack gap={4}>
-              {/* 予算サマリー */}
-              <Box
-                border="1px solid #f1f1f0"
-                borderRadius="14px"
-                p={4}
-                boxShadow="0 8px 20px rgba(0,0,0,0.04)"
-              >
-                <Text fontWeight="700" fontSize="sm" mb={2} color="#111827">
-                  予算サマリー
-                </Text>
-                <TimelineSummary
+                <BudgetSummaryCard
                   categoryTotals={categoryTotals}
                   totalAmount={totalAmount}
                   perPersonAmount={perPersonAmount}
@@ -491,6 +490,35 @@ export default function TimelineEditor() {
                   categoryMeta={SUMMARY_CATEGORY_META}
                 />
               </Box>
+            )}
+
+            <Text mt={6} fontSize="xs" color="#6b7280">
+              入力内容はブラウザのローカル（localStorage）に保存されます。
+            </Text>
+            <PublishShareActions
+              isPublishing={isPublishing}
+              shareLinkId={shareLinkId}
+              publishError={publishError}
+              onPublish={() => {
+                void handlePublishShare();
+              }}
+            />
+          </Box>
+        </Flex>
+
+        {/* Right sidebar：デスクトップのみ */}
+        {isDesktop && (
+          <Box bg="white" p={4} overflow="auto" minH={0}>
+            <Stack gap={4}>
+              {/* 予算サマリー */}
+              <BudgetSummaryCard
+                categoryTotals={categoryTotals}
+                totalAmount={totalAmount}
+                perPersonAmount={perPersonAmount}
+                peopleCount={peopleCount}
+                onPeopleChange={setPeopleCount}
+                categoryMeta={SUMMARY_CATEGORY_META}
+              />
 
               <TripAlbumCard
                 photos={albumPhotos}

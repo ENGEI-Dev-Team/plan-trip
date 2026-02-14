@@ -1,31 +1,31 @@
-name: Lint and Test  # Actions 上での表示名
+name: Lint and Test # Actions 上での表示名
 
 on:
   push:
-    branches: [main, develop]  # main / develop への push で起動
+    branches: [main, develop] # main / develop への push で起動
   pull_request:
-    branches: [main, develop]  # main / develop 向け PR で起動
+    branches: [main, develop] # main / develop 向け PR で起動
 
 jobs:
   lint-and-test:
-    runs-on: ubuntu-latest  # GitHub 提供の Ubuntu runner で実行
+    runs-on: ubuntu-latest # GitHub 提供の Ubuntu runner で実行
     steps:
-      - name: Checkout  # ソースコードを取得
+      - name: Checkout # ソースコードを取得
         uses: actions/checkout@v4
 
-      - name: Setup Node.js  # Node.js 20 + npm キャッシュを利用
+      - name: Setup Node.js # Node.js 20 + npm キャッシュを利用
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
-      - name: Install dependencies  # npm lockfile に従って依存を導入
+      - name: Install dependencies # npm lockfile に従って依存を導入
         run: npm ci
 
-      - name: Lint  # ESLint
+      - name: Lint # ESLint
         run: npm run lint
 
-      - name: Unit tests  # Vitest
+      - name: Unit tests # Vitest
         run: npx vitest run
 
       # - name: Playwright (E2E)  # 必要になったらアンコメント

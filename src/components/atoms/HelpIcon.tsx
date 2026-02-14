@@ -1,14 +1,16 @@
+"use client";
 
-'use client';
-
-import React from 'react';
+import React from "react";
 
 interface HelpIconProps {
   onClick: () => void;
   className?: string;
 }
 
-export const HelpIcon: React.FC<HelpIconProps> = ({ onClick, className = '' }) => {
+export const HelpIcon: React.FC<HelpIconProps> = ({
+  onClick,
+  className = "",
+}) => {
   return (
     <button
       onClick={onClick}

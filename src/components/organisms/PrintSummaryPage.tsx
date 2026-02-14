@@ -1,7 +1,6 @@
-
-import React from 'react';
-import { ItineraryData } from '@/types/itinerary';
-import { PrintHeader } from '../molecules/PrintHeader';
+import React from "react";
+import { ItineraryData } from "@/types/itinerary";
+import { PrintHeader } from "../molecules/PrintHeader";
 
 interface PrintSummaryPageProps {
   data: ItineraryData;
@@ -9,17 +8,20 @@ interface PrintSummaryPageProps {
 
 export const PrintSummaryPage: React.FC<PrintSummaryPageProps> = ({ data }) => {
   const totalAmount = data.schedules
-    .flatMap(schedule => schedule.items)
+    .flatMap((schedule) => schedule.items)
     .reduce((sum, item) => sum + (item.amount || 0), 0);
 
   const categoryTotals = data.schedules
-    .flatMap(schedule => schedule.items)
-    .reduce((acc, item) => {
-      if (item.amount) {
-        acc[item.category] = (acc[item.category] || 0) + item.amount;
-      }
-      return acc;
-    }, {} as Record<string, number>);
+    .flatMap((schedule) => schedule.items)
+    .reduce(
+      (acc, item) => {
+        if (item.amount) {
+          acc[item.category] = (acc[item.category] || 0) + item.amount;
+        }
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
   return (
     <div className="h-full p-6">

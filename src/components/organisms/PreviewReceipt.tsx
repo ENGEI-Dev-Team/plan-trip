@@ -1,21 +1,24 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { ItineraryData } from '@/types/itinerary';
+import React from "react";
+import { ItineraryData } from "@/types/itinerary";
 
 interface PreviewReceiptProps {
   itineraryData: ItineraryData;
   memberCount: number;
 }
 
-export const PreviewReceipt: React.FC<PreviewReceiptProps> = ({ 
+export const PreviewReceipt: React.FC<PreviewReceiptProps> = ({
   itineraryData,
-  memberCount 
+  memberCount,
 }) => {
   const totalAmount = itineraryData.schedules.reduce((sum, schedule) => {
-    return sum + schedule.items.reduce((itemSum, item) => {
-      return itemSum + (item.amount || 0);
-    }, 0);
+    return (
+      sum +
+      schedule.items.reduce((itemSum, item) => {
+        return itemSum + (item.amount || 0);
+      }, 0)
+    );
   }, 0);
 
   const days = itineraryData.schedules.length;

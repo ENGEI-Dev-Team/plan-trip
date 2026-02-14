@@ -19,7 +19,12 @@ type Props = {
   onPhotoClick?: (url: string, index: number) => void;
 };
 
-export function TripAlbumCard({ photos, onAdd, onRemove, onPhotoClick }: Props) {
+export function TripAlbumCard({
+  photos,
+  onAdd,
+  onRemove,
+  onPhotoClick,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState("");
 

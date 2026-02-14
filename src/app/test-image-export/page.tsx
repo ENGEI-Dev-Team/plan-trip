@@ -1,18 +1,21 @@
 // src/app/test-image-export/page.tsx
 // 画像保存機能の独立テストページ
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { SaveImageButton } from '@/components/atoms/SaveImageButton';
-import { SaveImageModal } from '@/components/organisms/SaveImageModal';
-import { useImageExport } from '../../hooks/useImageExport';
-import { ImageExportOption } from '@/types/imageExport';
+import React, { useState } from "react";
+import { SaveImageButton } from "@/components/atoms/SaveImageButton";
+import { SaveImageModal } from "@/components/organisms/SaveImageModal";
+import { useImageExport } from "../../hooks/useImageExport";
+import { ImageExportOption } from "@/types/imageExport";
 
 export default function TestImageExportPage() {
   const [isSaveImageModalOpen, setIsSaveImageModalOpen] = useState(false);
   const { exportPrintPages } = useImageExport();
 
-  const handleSaveImage = async (option: ImageExportOption, fileName: string) => {
+  const handleSaveImage = async (
+    option: ImageExportOption,
+    fileName: string,
+  ) => {
     await exportPrintPages(option, fileName);
   };
 

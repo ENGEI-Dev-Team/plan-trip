@@ -1,5 +1,4 @@
-
-export type ImageExportOption = 'front' | 'back' | 'both';
+export type ImageExportOption = "front" | "back" | "both";
 
 export interface ImageExportSettings {
   option: ImageExportOption;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect,useMemo, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import {
   Badge,
   Box,
@@ -66,19 +66,19 @@ export default function TimelineItemRow({
   onDelete,
   onMove,
 }: TimelineItemRowProps) {
-const [isWide, setIsWide] = useState(false);
+  const [isWide, setIsWide] = useState(false);
 
-useEffect(() => {
-  const mq = window.matchMedia("(min-width: 880px)");
-  const update = () => setIsWide(mq.matches);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 880px)");
+    const update = () => setIsWide(mq.matches);
 
-  update();
-  mq.addEventListener?.("change", update);
+    update();
+    mq.addEventListener?.("change", update);
 
-  return () => {
-    mq.removeEventListener?.("change", update);
-  };
-}, []);
+    return () => {
+      mq.removeEventListener?.("change", update);
+    };
+  }, []);
   const currentCategory = useMemo(
     () => categoryOptions.find((o) => o.value === item.category),
     [categoryOptions, item.category],
@@ -165,7 +165,7 @@ useEffect(() => {
         borderRadius="full"
         bg={PRIMARY}
         border="3px solid #fff"
-        boxShadow="0 0 0 2px #e5e7eb"   // ← var(--line) を固定色に
+        boxShadow="0 0 0 2px #e5e7eb" // ← var(--line) を固定色に
         display={isWide ? "block" : "none"}
       />
 
@@ -197,7 +197,9 @@ useEffect(() => {
             <Input
               value={item.title}
               placeholder="スポット / 行き先など"
-              onChange={(e) => onChange(item.id, { title: e.currentTarget.value })}
+              onChange={(e) =>
+                onChange(item.id, { title: e.currentTarget.value })
+              }
               fontSize="lg"
               fontWeight="700"
               color="#1f2937"
@@ -214,7 +216,9 @@ useEffect(() => {
             <Textarea
               value={item.memo}
               placeholder="補足・移動手段・リンクなど"
-              onChange={(e) => onChange(item.id, { memo: e.currentTarget.value })}
+              onChange={(e) =>
+                onChange(item.id, { memo: e.currentTarget.value })
+              }
               mt={2}
               rows={2}
               color="#6b7280"
@@ -233,7 +237,9 @@ useEffect(() => {
               mt={3}
               value={item.photoUrl ?? ""}
               placeholder="写真URL（任意） https://..."
-              onChange={(e) => onChange(item.id, { photoUrl: e.currentTarget.value })}
+              onChange={(e) =>
+                onChange(item.id, { photoUrl: e.currentTarget.value })
+              }
               size="sm"
               border="1px solid #e5e7eb"
               borderRadius="10px"
@@ -264,11 +270,13 @@ useEffect(() => {
                   }}
                   onError={(e) => {
                     // 画像読み込み失敗時に「壊れた画像」を隠す
-                    (e.currentTarget as HTMLImageElement).style.display = "none";
+                    (e.currentTarget as HTMLImageElement).style.display =
+                      "none";
                   }}
                 />
                 <Text fontSize="xs" color="#6b7280" px={3} py={2}>
-                  ※表示されない場合：URLが https で公開されているか / アクセス制限がないか確認してください
+                  ※表示されない場合：URLが https で公開されているか /
+                  アクセス制限がないか確認してください
                 </Text>
               </Box>
             )}
@@ -323,14 +331,22 @@ useEffect(() => {
                 <Input
                   type="time"
                   value={item.time}
-                  onChange={(e) => onChange(item.id, { time: e.currentTarget.value })}
+                  onChange={(e) =>
+                    onChange(item.id, { time: e.currentTarget.value })
+                  }
                   {...pillInputBase}
                 />
               </Box>
             </Flex>
 
             {/* actions */}
-            <Flex mt={3} align="center" justify="space-between" gap={3} wrap="wrap">
+            <Flex
+              mt={3}
+              align="center"
+              justify="space-between"
+              gap={3}
+              wrap="wrap"
+            >
               <HStack gap={2}>
                 {sortMode === "manual" && (
                   <HStack gap={2}>
