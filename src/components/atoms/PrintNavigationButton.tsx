@@ -18,7 +18,7 @@ export const PrintNavigationButton: React.FC<PrintNavigationButtonProps> = ({
   const router = useRouter();
 
   const handleClick = () => {
-    router.push(`/print/${itineraryId}`);
+    router.push(`/preview/${itineraryId}`);
   };
 
   const baseStyles = "px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2";
