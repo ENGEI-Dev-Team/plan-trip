@@ -11,7 +11,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onCreateClick }) => {
     <Box as="section" py={8}>
       <Stack gap={4}>
         <Heading as="h1" size="xl">
-          1分で作れる、旅のしおり
+          2分で作れる、旅のしおり
         </Heading>
         <Text color="gray.600">
           複数人旅行の予定をまとめて、URLと三つ折り印刷でみんなに配れるWebしおりアプリです。
