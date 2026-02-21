@@ -1,9 +1,8 @@
+"use client";
 
-'use client';
-
-import React from 'react';
-import { PrintButton } from '../atoms/PrintButton';
-import { HelpIcon } from '../atoms/HelpIcon';
+import React from "react";
+import { PrintButton } from "../atoms/PrintButton";
+import { HelpIcon } from "../atoms/HelpIcon";
 
 interface PrintControlBarProps {
   onPrint: () => void;
@@ -11,10 +10,10 @@ interface PrintControlBarProps {
   onDownloadPdf: () => void;
 }
 
-export const PrintControlBar: React.FC<PrintControlBarProps> = ({ 
-  onPrint, 
+export const PrintControlBar: React.FC<PrintControlBarProps> = ({
+  onPrint,
   onHelp,
-  onDownloadPdf 
+  onDownloadPdf,
 }) => {
   return (
     <div className="flex items-center gap-3 p-4 bg-white border-b print:hidden">

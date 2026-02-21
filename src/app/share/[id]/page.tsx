@@ -1,7 +1,10 @@
+import { PrintNavigationButton } from "@/components/atoms/PrintNavigationButton";
 
-import { PrintNavigationButton } from '@/components/atoms/PrintNavigationButton';
-
-export default async function SharePage({ params }: { params: { id: string } }) {
+export default async function SharePage({
+  params,
+}: {
+  params: { id: string };
+}) {
   return (
     <div>
       <header className="flex justify-between">

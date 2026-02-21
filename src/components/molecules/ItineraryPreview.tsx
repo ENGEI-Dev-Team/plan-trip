@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Box,
-  Heading,
-  HStack,
-  Separator,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Heading, HStack, Separator, Stack, Text } from "@chakra-ui/react";
 
 export const ItineraryPreview = () => {
   return (

@@ -1,11 +1,11 @@
 // インストール:
 // pnpm add dom-to-image-more
 
-'use client';
+"use client";
 
-import { useCallback } from 'react';
-import domtoimage from 'dom-to-image-more';
-import { ImageExportOption } from '@/types/imageExport';
+import { useCallback } from "react";
+import domtoimage from "dom-to-image-more";
+import { ImageExportOption } from "@/types/imageExport";
 
 export const useImageExport = () => {
   const exportElementAsImage = useCallback(
@@ -15,7 +15,7 @@ export const useImageExport = () => {
       options: {
         scale?: number;
         quality?: number;
-      } = {}
+      } = {},
     ) => {
       const { scale = 2, quality = 0.92 } = options;
 
@@ -26,7 +26,7 @@ export const useImageExport = () => {
           height: element.scrollHeight * scale,
           style: {
             transform: `scale(${scale})`,
-            transformOrigin: 'top left',
+            transformOrigin: "top left",
             width: `${element.scrollWidth}px`,
             height: `${element.scrollHeight}px`,
           },
@@ -34,7 +34,7 @@ export const useImageExport = () => {
         });
 
         // ダウンロード実行
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.download = `${fileName}.png`;
         link.href = dataUrl;
         document.body.appendChild(link);
@@ -43,20 +43,20 @@ export const useImageExport = () => {
 
         return { success: true };
       } catch (error) {
-        console.error('Image export failed:', error);
+        console.error("Image export failed:", error);
         return { success: false, error: String(error) };
       }
     },
-    []
+    [],
   );
 
   const exportPrintPages = useCallback(
     async (option: ImageExportOption, baseFileName: string) => {
-      const frontPage = document.querySelector('.print-front') as HTMLElement;
-      const backPage = document.querySelector('.print-back') as HTMLElement;
+      const frontPage = document.querySelector(".print-front") as HTMLElement;
+      const backPage = document.querySelector(".print-back") as HTMLElement;
 
       if (!frontPage || !backPage) {
-        throw new Error('Print pages not found');
+        throw new Error("Print pages not found");
       }
 
       const exportOptions = {
@@ -65,23 +65,39 @@ export const useImageExport = () => {
       };
 
       try {
-        if (option === 'both') {
-          await exportElementAsImage(frontPage, `${baseFileName}_表面`, exportOptions);
+        if (option === "both") {
+          await exportElementAsImage(
+            frontPage,
+            `${baseFileName}_表面`,
+            exportOptions,
+          );
           await new Promise((resolve) => setTimeout(resolve, 500));
-          await exportElementAsImage(backPage, `${baseFileName}_裏面`, exportOptions);
-        } else if (option === 'front') {
-          await exportElementAsImage(frontPage, `${baseFileName}_表面`, exportOptions);
-        } else if (option === 'back') {
-          await exportElementAsImage(backPage, `${baseFileName}_裏面`, exportOptions);
+          await exportElementAsImage(
+            backPage,
+            `${baseFileName}_裏面`,
+            exportOptions,
+          );
+        } else if (option === "front") {
+          await exportElementAsImage(
+            frontPage,
+            `${baseFileName}_表面`,
+            exportOptions,
+          );
+        } else if (option === "back") {
+          await exportElementAsImage(
+            backPage,
+            `${baseFileName}_裏面`,
+            exportOptions,
+          );
         }
 
         return { success: true };
       } catch (error) {
-        console.error('Export failed:', error);
+        console.error("Export failed:", error);
         throw error;
       }
     },
-    [exportElementAsImage]
+    [exportElementAsImage],
   );
 
   return {

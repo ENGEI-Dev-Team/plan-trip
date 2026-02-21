@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { tripCreateSchema, TripCreateSchema } from "@/lib/validation/trip";
 import type { TripCreateInput } from "@/types/trip";
 import { useCreateTrip } from "@/hooks/useCreateTrip";
+import type { ItineraryPublishArgs } from "@/types/publish";
 
 // 必要に応じて外出ししてもOK
 const PREFECTURES = [
@@ -64,6 +65,22 @@ export const CreateTripCard: React.FC = () => {
 
     try {
       const result = await createTripMutation.mutateAsync(payload);
+      const publishArgs: ItineraryPublishArgs = {
+        itinerary_id: result.id,
+        title: payload.title,
+        pref_code: payload.prefecture,
+        start_date: payload.startDate,
+        end_date: payload.endDate,
+        people_count: 1,
+        items: [],
+      };
+      console.log("[create] default publishArgs", publishArgs);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(
+          `tripbook.publish-args.v1.${result.id}`,
+          JSON.stringify(publishArgs),
+        );
+      }
       router.push(`/edit/${result.id}`);
     } catch (error) {
       console.error(error);
@@ -117,17 +134,13 @@ export const CreateTripCard: React.FC = () => {
               <Field.Root invalid={!!errors.startDate} flex="1">
                 <Field.Label>開始日</Field.Label>
                 <Input type="date" {...register("startDate")} />
-                <Field.ErrorText>
-                  {errors.startDate?.message}
-                </Field.ErrorText>
+                <Field.ErrorText>{errors.startDate?.message}</Field.ErrorText>
               </Field.Root>
 
               <Field.Root invalid={!!errors.endDate} flex="1">
                 <Field.Label>終了日</Field.Label>
                 <Input type="date" {...register("endDate")} />
-                <Field.ErrorText>
-                  {errors.endDate?.message}
-                </Field.ErrorText>
+                <Field.ErrorText>{errors.endDate?.message}</Field.ErrorText>
               </Field.Root>
             </HStack>
 

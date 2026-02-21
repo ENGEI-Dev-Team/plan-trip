@@ -5,9 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { PrintNavigationButton } from "@/components/atoms/PrintNavigationButton";
 import TimelineEditor from "@/components/timeline/TimelineEditor";
 
-
 const PRIMARY = "#0ea5e9";
-
 
 export default function EditPage() {
   const params = useParams();
@@ -67,6 +65,15 @@ export default function EditPage() {
           >
             Editing
           </Box>
+          <Button
+            size="sm"
+            colorPalette="blue"
+            onClick={() =>
+              window.dispatchEvent(new CustomEvent("tripbook:test-save"))
+            }
+          >
+            保存テスト
+          </Button>
           <PrintNavigationButton itineraryId={itineraryId} />
         </Flex>
       </Flex>

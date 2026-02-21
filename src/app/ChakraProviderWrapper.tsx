@@ -15,9 +15,7 @@ export function ChakraProviderWrapper({ children }: Props) {
 
   return (
     <ChakraProvider value={defaultSystem}>
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </ChakraProvider>
   );
 }

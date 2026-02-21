@@ -1,19 +1,21 @@
 // src/components/templates/TrifoldPrintLayout.tsx
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { ItineraryData } from '@/types/itinerary';
-import { PrintControlBar } from '@/components/molecules/PrintControlBar';
-import { PrintCoverPage } from '@/components/organisms/PrintCoverPage';
-import { PrintSchedulePage } from '@/components/organisms/PrintSchedulePage';
-import { PrintSummaryPage } from '@/components/organisms/PrintSummaryPage';
-import { PrintHelpModal } from '@/components/organisms/PrintHelpModal';
+import React, { useState } from "react";
+import { ItineraryData } from "@/types/itinerary";
+import { PrintControlBar } from "@/components/molecules/PrintControlBar";
+import { PrintCoverPage } from "@/components/organisms/PrintCoverPage";
+import { PrintSchedulePage } from "@/components/organisms/PrintSchedulePage";
+import { PrintSummaryPage } from "@/components/organisms/PrintSummaryPage";
+import { PrintHelpModal } from "@/components/organisms/PrintHelpModal";
 
 interface TrifoldPrintLayoutProps {
   data: ItineraryData;
 }
 
-export const TrifoldPrintLayout: React.FC<TrifoldPrintLayoutProps> = ({ data }) => {
+export const TrifoldPrintLayout: React.FC<TrifoldPrintLayoutProps> = ({
+  data,
+}) => {
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
   const handlePrint = () => {
@@ -32,7 +34,7 @@ export const TrifoldPrintLayout: React.FC<TrifoldPrintLayoutProps> = ({ data }) 
 
   return (
     <>
-      <PrintControlBar 
+      <PrintControlBar
         onPrint={handlePrint}
         onHelp={() => setIsHelpModalOpen(true)}
         onDownloadPdf={handleDownloadPdf}
@@ -59,7 +61,7 @@ export const TrifoldPrintLayout: React.FC<TrifoldPrintLayoutProps> = ({ data }) 
               {remainingSchedules.length > 0 && (
                 <div className="space-y-4">
                   {remainingSchedules.map((schedule, index) => (
-                    <div key={index} className={index > 0 ? 'mt-6' : ''}>
+                    <div key={index} className={index > 0 ? "mt-6" : ""}>
                       <PrintSchedulePage schedule={schedule} showMemo={false} />
                     </div>
                   ))}
@@ -103,7 +105,7 @@ export const TrifoldPrintLayout: React.FC<TrifoldPrintLayoutProps> = ({ data }) 
         </div>
       </div>
 
-      <PrintHelpModal 
+      <PrintHelpModal
         isOpen={isHelpModalOpen}
         onClose={() => setIsHelpModalOpen(false)}
       />

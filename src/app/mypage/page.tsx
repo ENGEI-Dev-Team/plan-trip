@@ -1,12 +1,11 @@
+"use client";
 
-'use client';
-
-import { ItineraryActionBar } from '../../components/molecules/ItineraryActionBar';
-import { useRouter } from 'next/navigation';
+import { ItineraryActionBar } from "../../components/molecules/ItineraryActionBar";
+import { useRouter } from "next/navigation";
 
 export default function MyPage() {
   const router = useRouter();
-  const itineraryId = 'your-itinerary-id';
+  const itineraryId = "your-itinerary-id";
 
   const handleEdit = () => {
     router.push(`/edit/${itineraryId}`);

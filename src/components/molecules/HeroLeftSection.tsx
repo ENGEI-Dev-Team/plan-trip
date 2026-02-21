@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Button,
-  Heading,
-  HStack,
-  Stack,
-  Tag,
-  Text,
-} from "@chakra-ui/react";
+import { Button, Heading, HStack, Stack, Tag, Text } from "@chakra-ui/react";
 
 type HeroLeftSectionProps = {
   onCreateClick?: () => void;
@@ -64,13 +57,7 @@ export const HeroLeftSection = ({ onCreateClick }: HeroLeftSectionProps) => {
         </Text>
       </Stack>
 
-      <HStack
-        gap={3}
-        pt={2}
-        flexWrap="wrap"
-        fontSize="xs"
-        color="gray.600"
-      >
+      <HStack gap={3} pt={2} flexWrap="wrap" fontSize="xs" color="gray.600">
         <Tag.Root colorPalette="teal" size="sm" variant="surface">
           <Tag.Label>スマホ / PC 両対応</Tag.Label>
         </Tag.Root>

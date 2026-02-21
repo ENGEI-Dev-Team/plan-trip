@@ -1,50 +1,82 @@
-'use client';
+"use client";
 
-import { ItineraryData } from '@/types/itinerary';
-import { useRouter } from 'next/navigation';
-import { ItineraryPreviewLayout } from '@/components/templates/ItineraryPreviewLayout';
+import { useEffect, useMemo, useState } from "react";
+import { ItineraryData } from "@/types/itinerary";
+import { ItineraryDraft } from "@/types/itinerory";
+import type { GetShareResponse } from "@/types/share";
+import { useRouter } from "next/navigation";
+import { ItineraryPreviewLayout } from "@/components/templates/ItineraryPreviewLayout";
 
-// サンプルデータ
-const sampleData: ItineraryData = {
-  basicInfo: {
-    title: '京都紅葉めぐり',
-    prefecture: '京都府',
-    startDate: '2023-11-20',
-    endDate: '2023-11-21',
-  },
-  schedules: [
-    {
-      date: '2023-11-20',
-      items: [
-        {
-          id: '1',
-          time: '10:00',
-          category: '移動',
-          title: '京都駅到着',
-          memo: '東京から新幹線で到着。コインロッカーで荷物を預ける。',
-          amount: 14000,
-        },
-        // ...
-      ],
+type PreviewPageProps = {
+  params: {
+    id: string;
+  };
+};
+
+const toItineraryData = (draft: ItineraryDraft): ItineraryData => {
+  return {
+    basicInfo: {
+      title: draft.title,
+      prefecture: draft.destination,
+      startDate: draft.startDate,
+      endDate: draft.endDate,
     },
-  ],
+    schedules: draft.dailySchedules.map((schedule) => ({
+      date: schedule.date,
+      items: schedule.events.map((event) => ({
+        id: event.eventId,
+        time: event.time,
+        category: "その他",
+        title: event.activity,
+        memo: event.location
+          ? `${event.notes} / ${event.location}`
+          : event.notes,
+      })),
+    })),
+  };
 };
 
-// 画像マップ（任意）
-const images = {
-  '2': 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=800&q=80',
-  '3': 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80',
-};
-
-export default function PreviewPage() {
-
+export default function PreviewPage({ params }: PreviewPageProps) {
+  const [draft, setDraft] = useState<ItineraryDraft | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  
+
+  useEffect(() => {
+    const fetchShare = async () => {
+      try {
+        const response = await fetch(`/api/shares/${params.id}`);
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data?.error ?? "共有リンクの取得に失敗しました");
+        }
+        const data = (await response.json()) as GetShareResponse;
+        setDraft(data.payload as ItineraryDraft);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "共有リンクの取得に失敗しました",
+        );
+      }
+    };
+    fetchShare();
+  }, [params.id]);
+
+  const itineraryData = useMemo(
+    () => (draft ? toItineraryData(draft) : null),
+    [draft],
+  );
+
+  if (error) {
+    return <div className="p-6 text-red-600">{error}</div>;
+  }
+
+  if (!itineraryData) {
+    return <div className="p-6">読み込み中...</div>;
+  }
+
   return (
-    <ItineraryPreviewLayout 
-      itineraryData={sampleData}
+    <ItineraryPreviewLayout
+      itineraryData={itineraryData}
       memberCount={2}
-      itemImages={images}
       onBack={() => router.back()}
     />
   );

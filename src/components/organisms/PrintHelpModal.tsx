@@ -1,14 +1,17 @@
 // src/components/organisms/PrintHelpModal.tsx
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 
 interface PrintHelpModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const PrintHelpModal: React.FC<PrintHelpModalProps> = ({ isOpen, onClose }) => {
+export const PrintHelpModal: React.FC<PrintHelpModalProps> = ({
+  isOpen,
+  onClose,
+}) => {
   if (!isOpen) return null;
 
   return (
@@ -24,7 +27,7 @@ export const PrintHelpModal: React.FC<PrintHelpModalProps> = ({ isOpen, onClose 
               ×
             </button>
           </div>
-          
+
           <div className="space-y-6">
             <section>
               <h3 className="font-bold text-lg mb-2">両面プリンタの場合</h3>
