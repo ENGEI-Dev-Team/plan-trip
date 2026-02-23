@@ -1,11 +1,17 @@
 "use client";
 
 import { Box, Button, Flex, Text } from "@chakra-ui/react";
+import { Noto_Sans_JP } from "next/font/google";
 import { useParams, useRouter } from "next/navigation";
 import { PrintNavigationButton } from "@/components/atoms/PrintNavigationButton";
 import TimelineEditor from "@/components/timeline/TimelineEditor";
 
 const PRIMARY = "#0ea5e9";
+const notoSansJP = Noto_Sans_JP({
+  subsets: ["latin", "japanese"],
+  weight: ["400", "700"],
+  display: "swap",
+});
 
 export default function EditPage() {
   const params = useParams();
@@ -38,6 +44,8 @@ export default function EditPage() {
           color="#374151"
           borderRadius="full"
           _hover={{ bg: "#e5e7eb" }}
+          fontFamily={notoSansJP.style.fontFamily}
+          fontWeight="700"
           onClick={() => router.push("/")}
         >
           ← ホームへ
@@ -45,26 +53,11 @@ export default function EditPage() {
 
         <Box minW={0} flex={1}>
           <Text fontWeight="700" fontSize="md" noOfLines={1}>
-            旅のタイムラインを編集
-          </Text>
-          <Text color="#6b7280" fontSize="sm" noOfLines={1}>
-            ID: {itineraryId.slice(0, 8)}…
+            旅のしおりを編集
           </Text>
         </Box>
 
         <Flex align="center" gap={2}>
-          <Box
-            px={3}
-            py={1}
-            borderRadius="full"
-            bg="rgba(14,165,233,0.1)"
-            color={PRIMARY}
-            fontWeight="800"
-            fontSize="sm"
-            whiteSpace="nowrap"
-          >
-            Editing
-          </Box>
           <Button
             size="sm"
             colorPalette="blue"
@@ -74,7 +67,6 @@ export default function EditPage() {
           >
             保存テスト
           </Button>
-          <PrintNavigationButton itineraryId={itineraryId} />
         </Flex>
       </Flex>
 

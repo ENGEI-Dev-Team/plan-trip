@@ -498,14 +498,6 @@ export default function TimelineEditor() {
             <Text mt={6} fontSize="xs" color="#6b7280">
               入力内容はブラウザのローカル（localStorage）に保存されます。
             </Text>
-            <PublishShareActions
-              isPublishing={isPublishing}
-              shareLinkId={shareLinkId}
-              publishError={publishError}
-              onPublish={() => {
-                void handlePublishShare();
-              }}
-            />
           </Box>
         </Flex>
 
@@ -534,9 +526,6 @@ export default function TimelineEditor() {
                   alert(`clicked: ${index + 1}\n${url}`);
                 }}
               />
-
-              {/* 便利ツール */}
-              <UsefulToolsCard />
             </Stack>
           </Box>
         )}

@@ -30,17 +30,6 @@ export default function TimelineSummary({
   return (
     <Stack gap={4}>
       <Stack gap={1}>
-        <Text
-          fontSize="xs"
-          textTransform="uppercase"
-          letterSpacing="0.3em"
-          color="gray.500"
-        >
-          費用サマリー
-        </Text>
-        <Heading size="md" color="gray.800">
-          Budget
-        </Heading>
         <Text fontSize="sm" color="gray.500">
           カテゴリ別の合計と 1 人あたりの目安をリアルタイムに確認できます。
         </Text>
