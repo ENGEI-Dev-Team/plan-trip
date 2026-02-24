@@ -10,9 +10,8 @@ import {
   useMediaQuery,
 } from "@chakra-ui/react";
 import { useParams, useRouter } from "next/navigation";
-import { SortMode, TimelineCategory, TimelineItem } from "@/types/timeline";
+import { TimelineCategory, TimelineItem } from "@/types/timeline";
 import type { ItineraryPublishArgs } from "@/types/publish";
-import SortModeToggle from "./SortModeToggle";
 import TimelineDayTabs from "./TimelineDayTabs";
 import TimelineItemRow from "./TimelineItemRow";
 import BudgetSummaryCard from "./BudgetSummaryCard";
@@ -201,7 +200,6 @@ export default function TimelineEditor() {
   const [showSaveNotice, setShowSaveNotice] = useState(false);
   const [noticeType, setNoticeType] = useState<"success" | "error">("success");
   const [albumPhotos, setAlbumPhotos] = useState<string[]>([]);
-  const [sortMode, setSortMode] = useState<SortMode>("time");
   const [activeDay, setActiveDay] = useState(0);
   const dayTabs = ["1日目", "2日目", "3日目"];
   const didHydrateRef = useRef(false);
@@ -317,13 +315,8 @@ export default function TimelineEditor() {
 
   const sortedItems = useMemo(() => {
     const cloned = [...items];
-    if (sortMode === "time") {
-      return cloned.sort(
-        (a, b) => timeToMinutes(a.time) - timeToMinutes(b.time),
-      );
-    }
-    return cloned.sort((a, b) => a.orderIndex - b.orderIndex);
-  }, [items, sortMode]);
+    return cloned.sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
+  }, [items]);
 
   const { categoryTotals, totalAmount, perPersonAmount } = useMemo(() => {
     const totals: Record<TimelineCategory, number> = {
@@ -366,30 +359,6 @@ export default function TimelineEditor() {
     });
   };
 
-  const moveItem = (id: string, direction: "up" | "down") => {
-    if (sortMode !== "manual") return;
-    setItems((prev) => {
-      const ordered = [...prev].sort((a, b) => a.orderIndex - b.orderIndex);
-      const currentIndex = ordered.findIndex((it) => it.id === id);
-      if (currentIndex === -1) return prev;
-
-      const targetIndex =
-        direction === "up" ? currentIndex - 1 : currentIndex + 1;
-      if (targetIndex < 0 || targetIndex >= ordered.length) return prev;
-
-      const current = ordered[currentIndex];
-      const target = ordered[targetIndex];
-
-      return prev.map((it) => {
-        if (it.id === current.id)
-          return { ...it, orderIndex: target.orderIndex };
-        if (it.id === target.id)
-          return { ...it, orderIndex: current.orderIndex };
-        return it;
-      });
-    });
-  };
-
   const isEmpty = sortedItems.length === 0;
 
   return (
@@ -413,16 +382,6 @@ export default function TimelineEditor() {
             activeDay={activeDay}
             onChange={setActiveDay}
           />
-
-          {/* tools */}
-          <Box
-            px={4}
-            py={2}
-            borderBottom="1px solid #f1f1f0"
-            bg="rgba(255,255,255,0.6)"
-          >
-            <SortModeToggle value={sortMode} onChange={setSortMode} />
-          </Box>
 
           {/* scroll body (left only) */}
           <Box
@@ -459,17 +418,13 @@ export default function TimelineEditor() {
               </Box>
             ) : (
               <Stack gap={5}>
-                {sortedItems.map((item, index) => (
+                {sortedItems.map((item) => (
                   <TimelineItemRow
                     key={item.id}
                     item={item}
-                    sortMode={sortMode}
                     categoryOptions={CATEGORY_OPTIONS}
-                    isFirst={index === 0}
-                    isLast={index === sortedItems.length - 1}
                     onChange={updateItem}
                     onDelete={deleteItem}
-                    onMove={moveItem}
                   />
                 ))}
               </Stack>
@@ -596,4 +551,3 @@ export default function TimelineEditor() {
     </>
   );
 }
-

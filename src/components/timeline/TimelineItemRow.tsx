@@ -6,13 +6,12 @@ import {
   Box,
   Button,
   Flex,
-  HStack,
   Input,
   NativeSelect,
   Text,
   Textarea,
 } from "@chakra-ui/react";
-import { SortMode, TimelineCategory, TimelineItem } from "@/types/timeline";
+import { TimelineCategory, TimelineItem } from "@/types/timeline";
 
 const PRIMARY = "#0ea5e9";
 
@@ -25,13 +24,9 @@ interface CategoryOption {
 interface TimelineItemRowProps {
   item: TimelineItem;
   mounted?: boolean;
-  sortMode: SortMode;
   categoryOptions: CategoryOption[];
-  isFirst: boolean;
-  isLast: boolean;
   onChange: (id: string, patch: Partial<TimelineItem>) => void;
   onDelete: (id: string) => void;
-  onMove: (id: string, direction: "up" | "down") => void;
 }
 
 const formatAmount = (value: number) =>
@@ -58,13 +53,9 @@ const categoryEmoji = (c: TimelineCategory) => {
 
 export default function TimelineItemRow({
   item,
-  sortMode,
   categoryOptions,
-  isFirst,
-  isLast,
   onChange,
   onDelete,
-  onMove,
 }: TimelineItemRowProps) {
   const [isWide, setIsWide] = useState(false);
 
@@ -340,36 +331,7 @@ export default function TimelineItemRow({
             </Flex>
 
             {/* actions */}
-            <Flex
-              mt={3}
-              align="center"
-              justify="space-between"
-              gap={3}
-              wrap="wrap"
-            >
-              <HStack gap={2}>
-                {sortMode === "manual" && (
-                  <HStack gap={2}>
-                    <Button
-                      size="xs"
-                      variant="outline"
-                      onClick={() => onMove(item.id, "up")}
-                      disabled={isFirst}
-                    >
-                      ↑
-                    </Button>
-                    <Button
-                      size="xs"
-                      variant="outline"
-                      onClick={() => onMove(item.id, "down")}
-                      disabled={isLast}
-                    >
-                      ↓
-                    </Button>
-                  </HStack>
-                )}
-              </HStack>
-
+            <Flex mt={3} align="center" justify="flex-end" gap={3} wrap="wrap">
               <Button
                 size="sm"
                 variant="outline"
