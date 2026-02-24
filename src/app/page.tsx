@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect,useState } from "react";
 import { Box, Dialog } from "@chakra-ui/react";
 
 import { CreateTripCard } from "@/components/organisms/CreateTripCard";

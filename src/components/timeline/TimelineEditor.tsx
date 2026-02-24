@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
@@ -11,14 +11,23 @@ import {
   useMediaQuery,
 } from "@chakra-ui/react";
 import { useParams, useRouter } from "next/navigation";
-import { SortMode, TimelineCategory, TimelineItem } from "@/types/timeline";
+import type {
+  SortMode,
+  TimelineCategory,
+  TimelineItem,
+} from "@/types/timeline";
 import SortModeToggle from "./SortModeToggle";
 import TimelineItemRow from "./TimelineItemRow";
 import TimelineSummary from "./TimelineSummary";
 import { TripAlbumCard } from "@/components/molecules/TripAlbumCard";
 import { UsefulToolsCard } from "@/components/molecules/UsefulToolsCard";
-import dynamic from 'next/dynamic';
-import { useIsClient } from "@/hooks/useIsClient";
+import type { DayTab } from "@/types/dayTab";
+
+type TimelineEditorProps = {
+  days: DayTab[];
+  activeDayIndex: number;
+  onActiveDayChange: (index: number) => void;
+};
 
 const PRIMARY = "#0ea5e9";
 const TIMELINE_STORAGE_KEY = "tripbook.timeline-items.v1";
@@ -118,30 +127,6 @@ const DEFAULT_ITEMS: TimelineItem[] = [
   },
 ];
 
-const loadItemsFromStorage = (): TimelineItem[] => {
-  if (typeof window === "undefined") return DEFAULT_ITEMS;
-
-  try {
-    const stored = window.localStorage.getItem(TIMELINE_STORAGE_KEY);
-    if (!stored) return DEFAULT_ITEMS;
-
-    const parsed = JSON.parse(stored);
-    if (!Array.isArray(parsed)) return DEFAULT_ITEMS;
-
-    // 必要なら正規化（photoUrlがundefinedでも""にする等）
-    const normalized = (parsed as TimelineItem[]).map((it, index) => ({
-      ...it,
-      orderIndex: typeof it.orderIndex === "number" ? it.orderIndex : index,
-      amount: typeof it.amount === "number" ? it.amount : 0,
-      photoUrl: it.photoUrl ?? "",
-    }));
-
-    return normalized;
-  } catch {
-    return DEFAULT_ITEMS;
-  }
-};
-
 const createEmptyItem = (orderIndex: number): TimelineItem => ({
   id:
     typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -165,85 +150,91 @@ const timeToMinutes = (value: string) => {
   return hours * 60 + mins;
 };
 
-const loadInitialItems = (): TimelineItem[] => {
-  if (typeof window === "undefined") return DEFAULT_ITEMS;
-  try {
-    const stored = window.localStorage.getItem(TIMELINE_STORAGE_KEY);
-    if (!stored) return DEFAULT_ITEMS;
-    const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? (parsed as TimelineItem[]) : DEFAULT_ITEMS;
-  } catch {
-    return DEFAULT_ITEMS;
-  }
-};
-
-const loadInitialPeople = (): number => {
-  if (typeof window === "undefined") return 2;
-  try {
-    const saved = window.localStorage.getItem(PEOPLE_STORAGE_KEY);
-    if (!saved) return 2;
-    const parsed = Number(saved);
-    return !Number.isNaN(parsed) && parsed > 0 ? parsed : 2;
-  } catch {
-    return 2;
-  }
-};
-
-export default function TimelineEditor() {
+export default function TimelineEditor({
+  days,
+  activeDayIndex,
+  onActiveDayChange,
+}: TimelineEditorProps) {
   const params = useParams();
   const itineraryId = params.id as string;
   const router = useRouter();
-  const isClient = useIsClient();
+
   const [isDesktop, showLine] = useMediaQuery(
     ["(min-width: 961px)", "(min-width: 880px)"],
     { fallback: [false, false] },
   );
 
-  const [items, setItems] = useState<TimelineItem[]>(loadItemsFromStorage);
+  // ✅ 初回はサーバと同じHTMLにする（localStorageを初期化で読まない）
+  const [items, setItems] = useState<TimelineItem[]>(DEFAULT_ITEMS);
   const [peopleCount, setPeopleCount] = useState<number>(2);
   const [albumPhotos, setAlbumPhotos] = useState<string[]>([]);
   const [sortMode, setSortMode] = useState<SortMode>("time");
-  const [activeDay, setActiveDay] = useState(0);
-  const dayTabs = [{ label: "1日目" }, { label: "2日目" }, { label: "3日目" }];
-  const didHydrateRef = useRef(false);
 
+  // ✅ localStorage復元が終わったか
+  const [hydrated, setHydrated] = useState(false);
+
+  // ✅ マウント後に localStorage から復元（Hydration mismatch対策）
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    // items 復元
     try {
       const stored = window.localStorage.getItem(TIMELINE_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          const normalized = (parsed as TimelineItem[]).map((it) => ({
+          const normalized = (parsed as TimelineItem[]).map((it, index) => ({
             ...it,
+            orderIndex:
+              typeof it.orderIndex === "number" ? it.orderIndex : index,
+            amount: typeof it.amount === "number" ? it.amount : 0,
             photoUrl: it.photoUrl ?? "",
           }));
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setItems(normalized);
         }
       }
-    } catch {}
+    } catch {
+      // 失敗したらDEFAULTのまま
+    }
 
+    // peopleCount 復元
     try {
       const saved = window.localStorage.getItem(PEOPLE_STORAGE_KEY);
       if (saved) {
         const parsed = Number(saved);
         if (!Number.isNaN(parsed) && parsed > 0) setPeopleCount(parsed);
       }
-    } catch {}
+    } catch {
+      // 失敗したら2のまま
+    }
 
-    didHydrateRef.current = true;
+    setHydrated(true);
   }, []);
 
+  // ✅ 保存（items）…復元完了後だけ
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!didHydrateRef.current) return; // 初回読み込み前に保存しない
-    window.localStorage.setItem(TIMELINE_STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+    if (!hydrated) return;
 
+    const t = window.setTimeout(() => {
+      window.localStorage.setItem(TIMELINE_STORAGE_KEY, JSON.stringify(items));
+    }, 300);
+
+    return () => window.clearTimeout(t);
+  }, [items, hydrated]);
+
+  // ✅ 保存（peopleCount）…復元完了後だけ
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!didHydrateRef.current) return;
-    window.localStorage.setItem(PEOPLE_STORAGE_KEY, String(peopleCount));
-  }, [peopleCount]);
+    if (!hydrated) return;
+
+    const t = window.setTimeout(() => {
+      window.localStorage.setItem(PEOPLE_STORAGE_KEY, String(peopleCount));
+    }, 300);
+
+    return () => window.clearTimeout(t);
+  }, [peopleCount, hydrated]);
 
   const sortedItems = useMemo(() => {
     const cloned = [...items];
@@ -298,6 +289,7 @@ export default function TimelineEditor() {
 
   const moveItem = (id: string, direction: "up" | "down") => {
     if (sortMode !== "manual") return;
+
     setItems((prev) => {
       const ordered = [...prev].sort((a, b) => a.orderIndex - b.orderIndex);
       const currentIndex = ordered.findIndex((it) => it.id === id);
@@ -322,6 +314,10 @@ export default function TimelineEditor() {
 
   const isEmpty = sortedItems.length === 0;
 
+  // ✅ ここが「線とかぶらない」ためのガター調整
+  const LINE_X = 58;
+  const CONTENT_PL = 96;
+
   return (
     <>
       <Box
@@ -341,16 +337,16 @@ export default function TimelineEditor() {
           <HStack
             px={4}
             py={3}
-            gap={2} // ✅ v3はspacingではなくgap
+            gap={2}
             overflowX="auto"
             bg="rgba(250,250,249,0.85)"
             borderBottom="1px solid #f1f1f0"
           >
-            {dayTabs.map((t, idx) => {
-              const active = idx === activeDay;
+            {days.map((t, idx) => {
+              const active = idx === activeDayIndex;
               return (
                 <Button
-                  key={t.label}
+                  key={t.dateStr ?? t.label ?? String(idx)}
                   size="sm"
                   borderRadius="full"
                   border="1px solid"
@@ -360,7 +356,7 @@ export default function TimelineEditor() {
                   boxShadow={
                     active ? "0 10px 24px rgba(14,165,233,0.26)" : "none"
                   }
-                  onClick={() => setActiveDay(idx)}
+                  onClick={() => onActiveDayChange(idx)}
                   flexShrink={0}
                 >
                   {t.label}
@@ -379,7 +375,7 @@ export default function TimelineEditor() {
             <SortModeToggle value={sortMode} onChange={setSortMode} />
           </Box>
 
-          {/* scroll body (left only) */}
+          {/* scroll body */}
           <Box
             flex={1}
             minH={0}
@@ -387,84 +383,173 @@ export default function TimelineEditor() {
             px={{ base: 4, md: 5 }}
             py={{ base: 5, md: 6 }}
             pb={!isDesktop ? "140px" : "24px"}
-            position="relative"
           >
-            {/* ✅ sxを使わず、必要なときだけ縦ラインBoxを描画 */}
-            {showLine && (
-              <Box
-                position="absolute"
-                left="58px"
-                top="10px"
-                bottom="10px"
-                w="2px"
-                bg="#e5e7eb"
-              />
-            )}
-
-            {isEmpty ? (
-              <Box
-                bg="white"
-                border="1px dashed #d1d5db"
-                borderRadius="xl"
-                p={6}
-                textAlign="center"
-                color="#6b7280"
-                fontSize="sm"
-              >
-                まだタイムライン項目がありません。まずは「＋」から追加してみましょう。
-              </Box>
-            ) : (
-              <Stack gap={5}>
-                {sortedItems.map((item, index) => (
-                  <TimelineItemRow
-                    key={item.id}
-                    item={item}
-                    sortMode={sortMode}
-                    categoryOptions={CATEGORY_OPTIONS}
-                    isFirst={index === 0}
-                    isLast={index === sortedItems.length - 1}
-                    onChange={updateItem}
-                    onDelete={deleteItem}
-                    onMove={moveItem}
-                  />
-                ))}
-              </Stack>
-            )}
-
-            <Box mt={4}>
-              <Button variant="outline" borderStyle="dashed" onClick={addItem}>
-                + 項目を追加
-              </Button>
-            </Box>
-
-            {/* モバイル時は左下にも予算サマリー */}
-            {!isDesktop && (
-              <Box mt={4}>
+            {/* ✅ 中身ラッパー：これがコンテンツの高さになる */}
+            <Box position="relative" minH="100%">
+              {/* ✅ 線：ラッパー（=コンテンツ全体）に対してabsoluteで伸ばす */}
+              {showLine && (
                 <Box
-                  bg="white"
-                  border="1px solid #f1f1f0"
-                  borderRadius="14px"
-                  p={4}
-                  boxShadow="0 8px 20px rgba(0,0,0,0.04)"
-                >
-                  <Text fontWeight="700" fontSize="sm" mb={2} color="#111827">
-                    予算サマリー
-                  </Text>
-                  <TimelineSummary
-                    categoryTotals={categoryTotals}
-                    totalAmount={totalAmount}
-                    perPersonAmount={perPersonAmount}
-                    peopleCount={peopleCount}
-                    onPeopleChange={setPeopleCount}
-                    categoryMeta={SUMMARY_CATEGORY_META}
-                  />
-                </Box>
-              </Box>
-            )}
+                  position="absolute"
+                  left="88px"
+                  top="18px"
+                  bottom="18px"
+                  w="2px"
+                  bg="#e5e7eb"
+                  borderRadius="full"
+                  zIndex={0}
+                  pointerEvents="none"
+                />
+              )}
 
-            <Text mt={6} fontSize="xs" color="#6b7280">
-              入力内容はブラウザのローカル（localStorage）に保存されます。
-            </Text>
+              {/* ✅ カード群（線と重ならないように右へ） */}
+              <Box position="relative" zIndex={1}>
+                {isEmpty ? (
+                  <Box
+                    bg="white"
+                    border="1px dashed #d1d5db"
+                    borderRadius="xl"
+                    p={6}
+                    textAlign="center"
+                    color="#6b7280"
+                    fontSize="sm"
+                  >
+                    まだタイムライン項目がありません。まずは「＋」から追加してみましょう。
+                  </Box>
+                ) : (
+                  <Stack gap={5}>
+                    {sortedItems.map((item, index) => (
+                      <Box
+                        key={item.id}
+                        display="grid"
+                        gridTemplateColumns="72px 32px 1fr"
+                        columnGap={3}
+                        alignItems="start"
+                        position="relative"
+                      >
+                        {/* 左：時間 */}
+                        <Box
+                          pt="18px"
+                          textAlign="right"
+                          fontWeight="700"
+                          fontSize="sm"
+                          whiteSpace="nowrap"
+                          minH="20px"
+                          userSelect="none"
+                        >
+                          {item.time ? (
+                            <Box
+                              as="span"
+                              color="#6b7280"
+                              cursor="pointer"
+                              title="クリックして時間を編集"
+                              onClick={() => {
+                                const next = window.prompt(
+                                  "時間を入力（例 09:00）",
+                                  item.time,
+                                );
+                                if (next === null) return;
+                                updateItem(item.id, { time: next.trim() });
+                              }}
+                            >
+                              {item.time}
+                            </Box>
+                          ) : (
+                            <Button
+                              size="xs"
+                              variant="ghost"
+                              color="#94a3b8"
+                              px={2}
+                              h="24px"
+                              borderRadius="full"
+                              onClick={() => {
+                                const next = window.prompt(
+                                  "時間を入力（例 09:00）",
+                                  "",
+                                );
+                                if (next === null) return;
+                                updateItem(item.id, { time: next.trim() });
+                              }}
+                            >
+                              時間を追加
+                            </Button>
+                          )}
+                        </Box>
+
+                        {/* 中：ドット（線の上） */}
+                        <Box pt="18px" display="grid" placeItems="center">
+                          {showLine && (
+                            <Box
+                              w="10px"
+                              h="10px"
+                              borderRadius="full"
+                              bg="white"
+                              border="3px solid"
+                              borderColor={PRIMARY}
+                              pointerEvents="none"
+                            />
+                          )}
+                        </Box>
+
+                        {/* 右：カード */}
+                        <TimelineItemRow
+                          item={item}
+                          sortMode={sortMode}
+                          categoryOptions={CATEGORY_OPTIONS}
+                          isFirst={index === 0}
+                          isLast={index === sortedItems.length - 1}
+                          onChange={updateItem}
+                          onDelete={deleteItem}
+                          onMove={moveItem}
+                        />
+                      </Box>
+                    ))}
+                  </Stack>
+                )}
+
+                <Box mt={4}>
+                  <Button
+                    variant="outline"
+                    borderStyle="dashed"
+                    onClick={addItem}
+                  >
+                    + 項目を追加
+                  </Button>
+                </Box>
+
+                {!isDesktop && (
+                  <Box mt={4}>
+                    <Box
+                      bg="white"
+                      border="1px solid #f1f1f0"
+                      borderRadius="14px"
+                      p={4}
+                      boxShadow="0 8px 20px rgba(0,0,0,0.04)"
+                    >
+                      <Text
+                        fontWeight="700"
+                        fontSize="sm"
+                        mb={2}
+                        color="#111827"
+                      >
+                        予算サマリー
+                      </Text>
+                      <TimelineSummary
+                        categoryTotals={categoryTotals}
+                        totalAmount={totalAmount}
+                        perPersonAmount={perPersonAmount}
+                        peopleCount={peopleCount}
+                        onPeopleChange={setPeopleCount}
+                        categoryMeta={SUMMARY_CATEGORY_META}
+                      />
+                    </Box>
+                  </Box>
+                )}
+
+                <Text mt={6} fontSize="xs" color="#6b7280">
+                  入力内容はブラウザのローカル（localStorage）に保存されます。
+                </Text>
+              </Box>
+            </Box>
           </Box>
         </Flex>
 
@@ -472,7 +557,6 @@ export default function TimelineEditor() {
         {isDesktop && (
           <Box bg="white" p={4} overflow="auto" minH={0}>
             <Stack gap={4}>
-              {/* 予算サマリー */}
               <Box
                 border="1px solid #f1f1f0"
                 borderRadius="14px"
@@ -504,8 +588,6 @@ export default function TimelineEditor() {
                 }}
               />
 
-              {/* 便利ツール */}
-              <UsefulToolsCard />
             </Stack>
           </Box>
         )}

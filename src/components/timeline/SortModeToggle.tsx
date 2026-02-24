@@ -40,13 +40,13 @@ export default function SortModeToggle({
               <Card.Root
                 key={mode.value}
                 variant={active ? "outline" : "elevated"}
-                borderColor={active ? "pink.300" : "blackAlpha.100"}
-                bg={active ? "pink.50" : "white"}
+                borderColor={active ? "blue.300" : "blackAlpha.100"}
+                bg={active ? "blue.50" : "white"}
                 cursor="pointer"
                 onClick={() => onChange(mode.value)}
                 transition="all 0.15s ease"
                 _hover={{
-                  borderColor: "pink.200",
+                  borderColor: "blue.200",
                   boxShadow: "0 10px 25px rgba(244, 114, 182, 0.12)",
                 }}
               >
