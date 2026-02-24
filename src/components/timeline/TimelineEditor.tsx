@@ -16,7 +16,6 @@ import TimelineDayTabs from "./TimelineDayTabs";
 import TimelineItemRow from "./TimelineItemRow";
 import BudgetSummaryCard from "./BudgetSummaryCard";
 import PublishShareActions from "./PublishShareActions";
-import { TripAlbumCard } from "@/components/molecules/TripAlbumCard";
 import { UsefulToolsCard } from "@/components/molecules/UsefulToolsCard";
 import { SaveStatusToast } from "@/components/molecules/SaveStatusToast";
 
@@ -199,7 +198,6 @@ export default function TimelineEditor() {
   const [shareLinkId, setShareLinkId] = useState<string | null>(null);
   const [showSaveNotice, setShowSaveNotice] = useState(false);
   const [noticeType, setNoticeType] = useState<"success" | "error">("success");
-  const [albumPhotos, setAlbumPhotos] = useState<string[]>([]);
   const [activeDay, setActiveDay] = useState(0);
   const dayTabs = ["1日目", "2日目", "3日目"];
   const didHydrateRef = useRef(false);
@@ -470,17 +468,6 @@ export default function TimelineEditor() {
                 categoryMeta={SUMMARY_CATEGORY_META}
               />
 
-              <TripAlbumCard
-                photos={albumPhotos}
-                onAdd={(url) => setAlbumPhotos((prev) => [url, ...prev])}
-                onRemove={(index) =>
-                  setAlbumPhotos((prev) => prev.filter((_, i) => i !== index))
-                }
-                onPhotoClick={(url, index) => {
-                  console.log("clicked:", url);
-                  alert(`clicked: ${index + 1}\n${url}`);
-                }}
-              />
             </Stack>
           </Box>
         )}
