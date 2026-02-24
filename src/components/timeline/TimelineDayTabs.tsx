@@ -15,9 +15,9 @@ export default function TimelineDayTabs({
 }: TimelineDayTabsProps) {
   return (
     <HStack
-      px={4}
-      py={3}
-      gap={2}
+      px={3}
+      py={2}
+      gap={1}
       overflowX="auto"
       bg="rgba(250,250,249,0.85)"
       borderBottom="1px solid #f1f1f0"
@@ -27,7 +27,7 @@ export default function TimelineDayTabs({
         return (
           <Button
             key={label}
-            size="sm"
+            size="xs"
             borderRadius="full"
             border="1px solid"
             borderColor={active ? "transparent" : "#e5e7eb"}
@@ -36,6 +36,8 @@ export default function TimelineDayTabs({
             boxShadow={active ? "0 10px 24px rgba(14,165,233,0.26)" : "none"}
             onClick={() => onChange(idx)}
             flexShrink={0}
+            minW="auto"
+            px={3}
           >
             {label}
           </Button>
