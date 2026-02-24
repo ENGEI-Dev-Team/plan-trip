@@ -163,6 +163,37 @@ const timeToMinutes = (value: string) => {
   return hours * 60 + mins;
 };
 
+const parseDateYMDToUTC = (value: string): number | null => {
+  if (!value) return null;
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (
+    Number.isNaN(year) ||
+    Number.isNaN(month) ||
+    Number.isNaN(day) ||
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    day > 31
+  ) {
+    return null;
+  }
+  const utc = Date.UTC(year, month - 1, day);
+  return Number.isNaN(utc) ? null : utc;
+};
+
+const calcTripDays = (startDate: string, endDate: string): number | null => {
+  const startUtc = parseDateYMDToUTC(startDate);
+  const endUtc = parseDateYMDToUTC(endDate || startDate);
+  if (startUtc === null || endUtc === null) return null;
+  const diffDays = Math.floor((endUtc - startUtc) / 86_400_000);
+  const days = diffDays + 1;
+  return days > 0 ? days : 1;
+};
+
 const loadInitialPeople = (storageKey: string): number => {
   if (typeof window === "undefined") return 2;
   try {
@@ -199,7 +230,18 @@ export default function TimelineEditor() {
   const [showSaveNotice, setShowSaveNotice] = useState(false);
   const [noticeType, setNoticeType] = useState<"success" | "error">("success");
   const [activeDay, setActiveDay] = useState(0);
-  const dayTabs = ["1日目", "2日目", "3日目"];
+  const [tripDates, setTripDates] = useState<{
+    startDate: string;
+    endDate: string;
+  }>({
+    startDate: "",
+    endDate: "",
+  });
+  const dayTabs = useMemo(() => {
+    const days = calcTripDays(tripDates.startDate, tripDates.endDate);
+    const count = days ?? 1;
+    return Array.from({ length: count }, (_, idx) => `${idx + 1}日目`);
+  }, [tripDates.endDate, tripDates.startDate]);
   const didHydrateRef = useRef(false);
 
   // ✅ 初回hydration完了フラグのみ設定（setState削除）
@@ -226,8 +268,32 @@ export default function TimelineEditor() {
       }
     } catch {}
 
+    try {
+      const storedArgsRaw = window.localStorage.getItem(publishArgsKey);
+      if (storedArgsRaw) {
+        const storedArgs = JSON.parse(storedArgsRaw) as Partial<
+          ItineraryPublishArgs
+        >;
+        setTripDates({
+          startDate:
+            typeof storedArgs.start_date === "string"
+              ? storedArgs.start_date
+              : "",
+          endDate:
+            typeof storedArgs.end_date === "string" ? storedArgs.end_date : "",
+        });
+      }
+    } catch {}
+
     didHydrateRef.current = true;
-  }, [timelineStorageKey, peopleStorageKey]);
+  }, [timelineStorageKey, peopleStorageKey, publishArgsKey]);
+
+  useEffect(() => {
+    if (dayTabs.length === 0) return;
+    if (activeDay >= dayTabs.length) {
+      setActiveDay(dayTabs.length - 1);
+    }
+  }, [activeDay, dayTabs.length]);
 
   // ✅ itemsの変更を保存
   useEffect(() => {
