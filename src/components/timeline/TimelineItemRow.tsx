@@ -108,13 +108,14 @@ export default function TimelineItemRow({
     color: "#111827",
   } as const;
 
-  return (
+    return (
     <Box
       bg="white"
       border="1px solid #f1f1f0"
       borderRadius="16px"
       p={4}
       boxShadow="0 8px 20px rgba(0,0,0,0.04)"
+      position="relative"
     >
       {/* time label (>=880px) */}
       <Text
@@ -142,7 +143,7 @@ export default function TimelineItemRow({
         borderRadius="full"
         bg={PRIMARY}
         border="3px solid #fff"
-        boxShadow="0 0 0 2px #e5e7eb" // ← var(--line) を固定色に
+        boxShadow="0 0 0 2px #e5e7eb"
         display={isWide ? "block" : "none"}
       />
 
@@ -155,6 +156,7 @@ export default function TimelineItemRow({
         boxShadow="0 12px 34px rgba(0,0,0,0.04)"
       >
         <Flex gap={3} align="flex-start">
+          {/* emoji icon */}
           <Box
             w="40px"
             h="40px"
@@ -168,8 +170,8 @@ export default function TimelineItemRow({
           >
             {categoryEmoji(item.category)}
           </Box>
-          </Flex>
 
+          {/* main content */}
           <Box flex={1} minW={0}>
             {/* title */}
             <Input
@@ -247,7 +249,6 @@ export default function TimelineItemRow({
                     display: "block",
                   }}
                   onError={(e) => {
-                    // 画像読み込み失敗時に「壊れた画像」を隠す
                     (e.currentTarget as HTMLImageElement).style.display =
                       "none";
                   }}
@@ -358,19 +359,8 @@ export default function TimelineItemRow({
               </Button>
             </Flex>
           </Box>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={item.photoUrl}
-            alt=""
-            style={{
-              width: "100%",
-              borderRadius: 12,
-              maxHeight: 220,
-              objectFit: "cover",
-            }}
-          />
-        </Box>
-      ) : null}
+        </Flex>
+      </Box>
     </Box>
   );
-}
+}_
