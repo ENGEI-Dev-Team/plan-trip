@@ -168,6 +168,7 @@ export default function TimelineItemRow({
           >
             {categoryEmoji(item.category)}
           </Box>
+          </Flex>
 
           <Box flex={1} minW={0}>
             {/* title */}
