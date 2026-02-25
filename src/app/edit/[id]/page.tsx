@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Button, Flex, Text, Input } from "@chakra-ui/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import TimelineEditor from "@/components/timeline/TimelineEditor";
 import type { DayTab } from "@/types/dayTab";
@@ -62,6 +62,16 @@ export default function EditPage() {
 
   const [activeDayIndex, setActiveDayIndex] = useState(0);
 
+  // ✅ ①② 共有URL用state
+  const [shareUrl, setShareUrl] = useState("");
+  const [shortUrl, setShortUrl] = useState<string | null>(null);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  // ✅ ② クライアントで現在URLを取得
+  useEffect(() => {
+    setShareUrl(window.location.href);
+  }, []);
+
   const days = useMemo<DayTab[]>(() => {
     const built = buildDays(startDate, endDate);
     if (built.length > 0) return built;
@@ -75,6 +85,25 @@ export default function EditPage() {
 
   const maxDayIndex = Math.max(days.length - 1, 0);
   const activeDayIndexSafe = Math.min(activeDayIndex, maxDayIndex);
+
+  // ✅ ③ コピー関数（EditPage内・returnの前）
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setToastMsg("コピーしました");
+      setTimeout(() => setToastMsg(null), 1200);
+    } catch {
+      setToastMsg("コピーに失敗しました");
+      setTimeout(() => setToastMsg(null), 1200);
+    }
+  };
+
+  // ✅ 仮の短縮リンク生成（後でAPIに差し替える場所）
+  const createShortLink = async () => {
+    const fake = `https://example.com/s/${itineraryId.slice(0, 8)}`;
+    setShortUrl(fake);
+    await copyToClipboard(fake);
+  };
 
   return (
     <Flex direction="column" h="100vh" bg="#f8f8f7" color="#1f2937">
@@ -152,10 +181,11 @@ export default function EditPage() {
             color="white"
             px={4}
             background="conic-gradient(from 180deg at 50% 50%, #00E5FF, #7C3AED, #FF00CC, #FF3D00, #FFEA00, #7CFF00, #00FF85, #00E5FF)"
-            boxShadow="0 14px 34px rgba(0,0,0,0.22)"
+            boxShadow="0 12px 26px rgba(0,0,0,0.18)"
+            border="1px solid rgba(255,255,255,0.35)"
             _hover={{
               transform: "translateY(-1px) scale(1.02)",
-              boxShadow: "0 18px 44px rgba(0,0,0,0.28)",
+              boxShadow: "0 16px 34px rgba(0,0,0,0.22)",
             }}
             _active={{ transform: "translateY(0px) scale(0.99)" }}
             onClick={() => router.push(`/print/${itineraryId}`)}
@@ -165,11 +195,48 @@ export default function EditPage() {
         </Flex>
       </Flex>
 
-      {/* meta */}
+      {/* ✅ ④ 共有UI（ID表示の代わり） */}
       <Box px={{ base: 3, md: 5 }} pt={2}>
-        <Text color="#6b7280" fontSize="xs">
-          ID: {itineraryId.slice(0, 8)}…
-        </Text>
+        <Flex align="center" gap={3} wrap="wrap">
+          <Text color="#6b7280" fontSize="xs">
+            共有（URL）
+          </Text>
+
+          <Button
+            size="xs"
+            variant="outline"
+            borderRadius="full"
+            onClick={() => copyToClipboard(shareUrl)}
+            disabled={!shareUrl}
+          >
+            URLをコピー
+          </Button>
+
+          <Button
+            size="xs"
+            variant="outline"
+            borderRadius="full"
+            onClick={createShortLink}
+          >
+            短い共有リンクを作成
+          </Button>
+
+          <Text color="#9ca3af" fontSize="xs">
+            ※内容が多くURLが長い場合（有効期限30日／期限後は閲覧不可・再発行可）
+          </Text>
+
+          {shortUrl && (
+            <Text color="#6b7280" fontSize="xs">
+              短縮：{shortUrl}
+            </Text>
+          )}
+
+          {toastMsg && (
+            <Text color="#0ea5e9" fontSize="xs" fontWeight="700">
+              {toastMsg}
+            </Text>
+          )}
+        </Flex>
       </Box>
 
       {/* content */}
