@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { ItineraryDraft } from '@/types/itinerary';
-import { loadDraft, saveDraft, EMPTY_DRAFT } from '@/utils/cookie';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { ItineraryDraft } from "@/types/itinerory";
+import { loadDraft, saveDraft, EMPTY_DRAFT } from "@/utils/cookie";
 
-type AutoSaveStatus = 'idle' | 'saving' | 'saved';
+type AutoSaveStatus = "idle" | "saving" | "saved";
 
 // 自動保存の間隔 (500ミリ秒)
 const DEBOUNCE_DELAY = 500;
@@ -12,11 +12,13 @@ const DEBOUNCE_DELAY = 500;
  */
 export const useAutoSave = () => {
   // 1. ステートの初期化: Cookieから既存のドラフトを読み込む
-  const [draft, setDraft] = useState<ItineraryDraft>(loadDraft() || EMPTY_DRAFT);
-  
+  const [draft, setDraft] = useState<ItineraryDraft>(
+    loadDraft() || EMPTY_DRAFT,
+  );
+
   // 2. 自動保存の状態管理
-  const [status, setStatus] = useState<AutoSaveStatus>('idle');
-  
+  const [status, setStatus] = useState<AutoSaveStatus>("idle");
+
   // 3. デバウンス用タイマーの参照
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -24,9 +26,8 @@ export const useAutoSave = () => {
   const performSave = useCallback((data: ItineraryDraft) => {
     // 最終保存日時を更新して保存を実行
     saveDraft({ ...data, lastSavedAt: Date.now() });
-    setStatus('saved');
+    setStatus("saved");
   }, []);
-
 
   // --- 外部公開用関数 ---
 
@@ -34,7 +35,7 @@ export const useAutoSave = () => {
    */
   const updateDraft = useCallback((newDraft: ItineraryDraft) => {
     setDraft(newDraft);
-    setStatus('saving'); // 変更があったらステータスを「保存中」に設定
+    setStatus("saving"); // 変更があったらステータスを「保存中」に設定
   }, []);
 
   /**
@@ -48,12 +49,11 @@ export const useAutoSave = () => {
     performSave(draft); // 即時保存を実行
   }, [draft, performSave]);
 
-
   // --- 自動デバウンス処理 ---
 
   useEffect(() => {
     // statusが'saving'でなければ自動保存は不要
-    if (status !== 'saving') return;
+    if (status !== "saving") return;
 
     // 1. 既存のタイマーがあればクリア
     if (timerRef.current) {
@@ -74,7 +74,6 @@ export const useAutoSave = () => {
       }
     };
   }, [draft, status, performSave]);
-
 
   return { draft, updateDraft, status, forceSave };
 };

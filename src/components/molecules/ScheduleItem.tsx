@@ -1,7 +1,6 @@
-
-import React from 'react';
-import { ItineraryItem } from '@/types/itinerary';
-import { CategoryBadge } from '../atoms/CategoryBadge';
+import React from "react";
+import { ItineraryItem } from "@/types/itinerary";
+import { CategoryBadge } from "../atoms/CategoryBadge";
 
 interface ScheduleItemProps {
   item: ItineraryItem;
@@ -9,10 +8,10 @@ interface ScheduleItemProps {
   showMemo?: boolean;
 }
 
-export const ScheduleItem: React.FC<ScheduleItemProps> = ({ 
-  item, 
-  showAmount = true, 
-  showMemo = true 
+export const ScheduleItem: React.FC<ScheduleItemProps> = ({
+  item,
+  showAmount = true,
+  showMemo = true,
 }) => {
   return (
     <div className="flex gap-2 mb-2 text-sm">
@@ -22,7 +21,9 @@ export const ScheduleItem: React.FC<ScheduleItemProps> = ({
           <CategoryBadge category={item.category} />
           <span className="font-medium">{item.title}</span>
           {showAmount && item.amount && (
-            <span className="text-gray-600 text-xs ml-auto">¥{item.amount.toLocaleString()}</span>
+            <span className="text-gray-600 text-xs ml-auto">
+              ¥{item.amount.toLocaleString()}
+            </span>
           )}
         </div>
         {showMemo && item.memo && (

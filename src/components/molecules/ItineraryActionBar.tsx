@@ -1,8 +1,7 @@
+"use client";
 
-'use client';
-
-import React from 'react';
-import { PrintNavigationButton } from '@/components/atoms/PrintNavigationButton';
+import React from "react";
+import { PrintNavigationButton } from "@/components/atoms/PrintNavigationButton";
 
 interface ItineraryActionBarProps {
   itineraryId: string;
@@ -73,9 +72,7 @@ export const ItineraryActionBar: React.FC<ItineraryActionBarProps> = ({
         </button>
       )}
 
-      {showPrint && (
-        <PrintNavigationButton itineraryId={itineraryId} />
-      )}
+      {showPrint && <PrintNavigationButton itineraryId={itineraryId} />}
 
       {showDelete && onDelete && (
         <button

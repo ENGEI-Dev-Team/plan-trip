@@ -1,14 +1,16 @@
+"use client";
 
-'use client';
-
-import React from 'react';
+import React from "react";
 
 interface SaveImageButtonProps {
   onClick: () => void;
   className?: string;
 }
 
-export const SaveImageButton: React.FC<SaveImageButtonProps> = ({ onClick, className = '' }) => {
+export const SaveImageButton: React.FC<SaveImageButtonProps> = ({
+  onClick,
+  className = "",
+}) => {
   return (
     <button
       onClick={onClick}

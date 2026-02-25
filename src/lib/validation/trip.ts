@@ -1,4 +1,3 @@
-
 // src/lib/validation/trip.ts
 import { z } from "zod";
 import { DateTime } from "luxon";
@@ -10,15 +9,9 @@ export const tripCreateSchema = z
       .string()
       .min(1, "タイトルを入力してください")
       .max(50, "タイトルは50文字以内で入力してください"),
-    prefecture: z
-      .string()
-      .min(1, "都道府県を選択してください"),
-    startDate: z
-      .string()
-      .min(1, "開始日を選択してください"),
-    endDate: z
-      .string()
-      .min(1, "終了日を選択してください"),
+    prefecture: z.string().min(1, "都道府県を選択してください"),
+    startDate: z.string().min(1, "開始日を選択してください"),
+    endDate: z.string().min(1, "終了日を選択してください"),
   })
   .refine(
     (data) => {
@@ -30,7 +23,7 @@ export const tripCreateSchema = z
     {
       message: "終了日は開始日以降の日付を選択してください",
       path: ["endDate"],
-    }
+    },
   );
 
 export type TripCreateSchema = z.infer<typeof tripCreateSchema>;

@@ -1,12 +1,13 @@
-
-import React from 'react';
-import { ItineraryBasicInfo } from '@/types/itinerary';
+import React from "react";
+import { ItineraryBasicInfo } from "@/types/itinerary";
 
 interface PrintCoverPageProps {
   basicInfo: ItineraryBasicInfo;
 }
 
-export const PrintCoverPage: React.FC<PrintCoverPageProps> = ({ basicInfo }) => {
+export const PrintCoverPage: React.FC<PrintCoverPageProps> = ({
+  basicInfo,
+}) => {
   const formatDateRange = (start: string, end: string) => {
     const startDate = new Date(start);
     const endDate = new Date(end);

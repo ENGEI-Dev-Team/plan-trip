@@ -66,7 +66,10 @@ export const HomeSteps = () => {
               textAlign="center"
               boxShadow="0 14px 40px rgba(0,0,0,0.04)"
               transition="transform 180ms ease, box-shadow 180ms ease"
-              _hover={{ transform: "translateY(-6px)", boxShadow: "0 18px 60px rgba(0,0,0,0.06)" }}
+              _hover={{
+                transform: "translateY(-6px)",
+                boxShadow: "0 18px 60px rgba(0,0,0,0.06)",
+              }}
             >
               <Box
                 w="64px"

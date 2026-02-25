@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { tripCreateSchema, TripCreateSchema } from "@/lib/validation/trip";
 import type { TripCreateInput } from "@/types/trip";
 import { useCreateTrip } from "@/hooks/useCreateTrip";
+import type { ItineraryPublishArgs } from "@/types/publish";
 
 // 必要に応じて外出ししてもOK
 const PREFECTURES = [
@@ -98,16 +99,23 @@ export const CreateTripCard: React.FC = () => {
 
     try {
       const result = await createTripMutation.mutateAsync(payload);
-
-      // ✅ edit側が searchParams で受け取れるようにクエリ付きで遷移
-      const qs = new URLSearchParams({
-        title: values.title ?? "",
-        pref: values.prefecture ?? "",
-        start: values.startDate ?? "",
-        end: values.endDate ?? "",
-      }).toString();
-
-      router.push(`/edit/${result.id}?${qs}`);
+      const publishArgs: ItineraryPublishArgs = {
+        itinerary_id: result.id,
+        title: payload.title,
+        pref_code: payload.prefecture,
+        start_date: payload.startDate,
+        end_date: payload.endDate,
+        people_count: 1,
+        items: [],
+      };
+      console.log("[create] default publishArgs", publishArgs);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(
+          `tripbook.publish-args.v1.${result.id}`,
+          JSON.stringify(publishArgs),
+        );
+      }
+      router.push(`/edit/${result.id}`);
     } catch (error) {
       console.error(error);
       alert("旅行プランの作成に失敗しました。時間をおいて再度お試しください。");

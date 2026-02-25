@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { ItineraryItem } from '@/types/itinerary';
+import React from "react";
+import { ItineraryItem } from "@/types/itinerary";
 
 interface TimelineEntryProps {
   item: ItineraryItem;
@@ -9,10 +9,10 @@ interface TimelineEntryProps {
   showAmount?: boolean;
 }
 
-export const TimelineEntry: React.FC<TimelineEntryProps> = ({ 
-  item, 
+export const TimelineEntry: React.FC<TimelineEntryProps> = ({
+  item,
   imageUrl,
-  showAmount = true 
+  showAmount = true,
 }) => {
   return (
     <div className="entry">

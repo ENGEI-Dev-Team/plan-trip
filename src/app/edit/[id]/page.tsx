@@ -4,47 +4,8 @@ import { Box, Button, Flex, Text, Input } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import TimelineEditor from "@/components/timeline/TimelineEditor";
-import type { DayTab } from "@/types/dayTab";
 
 const PRIMARY = "#0ea5e9";
-
-// ✅ 日付タブ生成（YYYY-MM-DD）
-function parseYmd(ymd: string) {
-  const [y, m, d] = ymd.split("-").map(Number);
-  return new Date(y, m - 1, d);
-}
-function toYmd(d: Date) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-function formatMD(d: Date) {
-  return `${d.getMonth() + 1}/${d.getDate()}`;
-}
-
-function buildDays(startYmd: string, endYmd: string): DayTab[] {
-  if (!startYmd || !endYmd) return [];
-  const start = parseYmd(startYmd);
-  const end = parseYmd(endYmd);
-  if (end < start) return [];
-
-  const out: DayTab[] = [];
-  const cur = new Date(start);
-  let i = 0;
-
-  while (cur <= end) {
-    out.push({
-      index: i,
-      dateStr: toYmd(cur),
-      label: `${i + 1}日目 ${formatMD(cur)}`,
-    });
-    cur.setDate(cur.getDate() + 1);
-    i++;
-    if (i > 60) break;
-  }
-  return out;
-}
 
 export default function EditPage() {
   const params = useParams();
@@ -173,7 +134,6 @@ export default function EditPage() {
           >
             {prefecture}
           </Box>
-
           <Button
             size="sm"
             borderRadius="full"
@@ -188,10 +148,13 @@ export default function EditPage() {
               boxShadow: "0 16px 34px rgba(0,0,0,0.22)",
             }}
             _active={{ transform: "translateY(0px) scale(0.99)" }}
-            onClick={() => router.push(`/print/${itineraryId}`)}
+            onClick={() =>
+              window.dispatchEvent(new CustomEvent("tripbook:test-save"))
+            }
           >
             できた！
           </Button>
+          <PrintNavigationButton itineraryId={itineraryId} />
         </Flex>
       </Flex>
 

@@ -1,8 +1,7 @@
+"use client";
 
-'use client';
-
-import React, { useState } from 'react';
-import { ImageExportOption } from '@/types/imageExport';
+import React, { useState } from "react";
+import { ImageExportOption } from "@/types/imageExport";
 
 interface SaveImageModalProps {
   isOpen: boolean;
@@ -17,7 +16,8 @@ export const SaveImageModal: React.FC<SaveImageModalProps> = ({
   onSave,
   defaultFileName,
 }) => {
-  const [selectedOption, setSelectedOption] = useState<ImageExportOption>('both');
+  const [selectedOption, setSelectedOption] =
+    useState<ImageExportOption>("both");
   const [fileName, setFileName] = useState(defaultFileName);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -29,17 +29,17 @@ export const SaveImageModal: React.FC<SaveImageModalProps> = ({
       await onSave(selectedOption, fileName);
       onClose();
     } catch (error) {
-      console.error('Failed to save image:', error);
-      alert('画像の保存に失敗しました。もう一度お試しください。');
+      console.error("Failed to save image:", error);
+      alert("画像の保存に失敗しました。もう一度お試しください。");
     } finally {
       setIsProcessing(false);
     }
   };
 
   const getFileNamePreview = () => {
-    if (selectedOption === 'both') {
+    if (selectedOption === "both") {
       return `${fileName}_表面.png, ${fileName}_裏面.png`;
-    } else if (selectedOption === 'front') {
+    } else if (selectedOption === "front") {
       return `${fileName}_表面.png`;
     } else {
       return `${fileName}_裏面.png`;
@@ -73,14 +73,18 @@ export const SaveImageModal: React.FC<SaveImageModalProps> = ({
                     type="radio"
                     name="exportOption"
                     value="both"
-                    checked={selectedOption === 'both'}
-                    onChange={(e) => setSelectedOption(e.target.value as ImageExportOption)}
+                    checked={selectedOption === "both"}
+                    onChange={(e) =>
+                      setSelectedOption(e.target.value as ImageExportOption)
+                    }
                     className="mt-1 mr-3"
                     disabled={isProcessing}
                   />
                   <div>
                     <div className="font-medium">両面（表面・裏面）</div>
-                    <div className="text-sm text-gray-600">2枚の画像として保存されます</div>
+                    <div className="text-sm text-gray-600">
+                      2枚の画像として保存されます
+                    </div>
                   </div>
                 </label>
 
@@ -89,14 +93,18 @@ export const SaveImageModal: React.FC<SaveImageModalProps> = ({
                     type="radio"
                     name="exportOption"
                     value="front"
-                    checked={selectedOption === 'front'}
-                    onChange={(e) => setSelectedOption(e.target.value as ImageExportOption)}
+                    checked={selectedOption === "front"}
+                    onChange={(e) =>
+                      setSelectedOption(e.target.value as ImageExportOption)
+                    }
                     className="mt-1 mr-3"
                     disabled={isProcessing}
                   />
                   <div>
                     <div className="font-medium">表面のみ</div>
-                    <div className="text-sm text-gray-600">表紙とスケジュール</div>
+                    <div className="text-sm text-gray-600">
+                      表紙とスケジュール
+                    </div>
                   </div>
                 </label>
 
@@ -105,14 +113,18 @@ export const SaveImageModal: React.FC<SaveImageModalProps> = ({
                     type="radio"
                     name="exportOption"
                     value="back"
-                    checked={selectedOption === 'back'}
-                    onChange={(e) => setSelectedOption(e.target.value as ImageExportOption)}
+                    checked={selectedOption === "back"}
+                    onChange={(e) =>
+                      setSelectedOption(e.target.value as ImageExportOption)
+                    }
                     className="mt-1 mr-3"
                     disabled={isProcessing}
                   />
                   <div>
                     <div className="font-medium">裏面のみ</div>
-                    <div className="text-sm text-gray-600">メモと予算サマリー</div>
+                    <div className="text-sm text-gray-600">
+                      メモと予算サマリー
+                    </div>
                   </div>
                 </label>
               </div>
@@ -200,7 +212,7 @@ export const SaveImageModal: React.FC<SaveImageModalProps> = ({
                   処理中...
                 </>
               ) : (
-                '保存する'
+                "保存する"
               )}
             </button>
           </div>
