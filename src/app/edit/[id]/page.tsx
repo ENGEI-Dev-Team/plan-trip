@@ -29,10 +29,9 @@ export default function EditPage() {
   const [shortUrl, setShortUrl] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
-  // ✅ ② クライアントで現在URLを取得
-  useEffect(() => {
-    setShareUrl(window.location.href);
-  }, []);
+const [shareUrl, setShareUrl] = useState<string>(
+  typeof window !== "undefined" ? window.location.href : ""
+);
 
   const days = useMemo<DayTab[]>(() => {
     const built = buildDays(startDate, endDate);
