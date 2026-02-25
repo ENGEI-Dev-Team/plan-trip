@@ -209,6 +209,8 @@ export default function TimelineEditor() {
   // ✅ 初回hydration完了フラグのみ設定（setState削除）
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    // items 復元
     try {
       const stored = window.localStorage.getItem(timelineStorageKey);
       if (stored) {
@@ -216,19 +218,29 @@ export default function TimelineEditor() {
         if (Array.isArray(parsed)) {
           (parsed as TimelineItem[]).map((it) => ({
             ...it,
+            orderIndex:
+              typeof it.orderIndex === "number" ? it.orderIndex : index,
+            amount: typeof it.amount === "number" ? it.amount : 0,
             photoUrl: it.photoUrl ?? "",
           }));
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setItems(normalized);
         }
       }
-    } catch {}
+    } catch {
+      // 失敗したらDEFAULTのまま
+    }
 
+    // peopleCount 復元
     try {
       const saved = window.localStorage.getItem(peopleStorageKey);
       if (saved) {
         const parsed = Number(saved);
         if (!Number.isNaN(parsed) && parsed > 0) setPeopleCount(parsed);
       }
-    } catch {}
+    } catch {
+      // 失敗したら2のまま
+    }
 
     didHydrateRef.current = true;
   }, [timelineStorageKey, peopleStorageKey]);
@@ -365,6 +377,7 @@ export default function TimelineEditor() {
 
   const moveItem = (id: string, direction: "up" | "down") => {
     if (sortMode !== "manual") return;
+
     setItems((prev) => {
       const ordered = [...prev].sort((a, b) => a.orderIndex - b.orderIndex);
       const currentIndex = ordered.findIndex((it) => it.id === id);
@@ -388,6 +401,10 @@ export default function TimelineEditor() {
   };
 
   const isEmpty = sortedItems.length === 0;
+
+  // ✅ ここが「線とかぶらない」ためのガター調整
+  const LINE_X = 58;
+  const CONTENT_PL = 96;
 
   return (
     <>
@@ -421,7 +438,7 @@ export default function TimelineEditor() {
             <SortModeToggle value={sortMode} onChange={setSortMode} />
           </Box>
 
-          {/* scroll body (left only) */}
+          {/* scroll body */}
           <Box
             flex={1}
             minH={0}
@@ -429,7 +446,6 @@ export default function TimelineEditor() {
             px={{ base: 4, md: 5 }}
             py={{ base: 5, md: 6 }}
             pb={!isDesktop ? "140px" : "24px"}
-            position="relative"
           >
             {showLine && (
               <Box
@@ -532,8 +548,6 @@ export default function TimelineEditor() {
                 }}
               />
 
-              {/* 便利ツール */}
-              <UsefulToolsCard />
             </Stack>
           </Box>
         )}

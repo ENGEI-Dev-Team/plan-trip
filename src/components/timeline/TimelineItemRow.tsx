@@ -14,52 +14,26 @@ import {
 } from "@chakra-ui/react";
 import { SortMode, TimelineCategory, TimelineItem } from "@/types/timeline";
 
-const PRIMARY = "#0ea5e9";
-
-interface CategoryOption {
+type CategoryOption = {
   value: TimelineCategory;
   label: string;
-  badgeClass: string;
-}
+  badgeClass?: string; // 既存に合わせて残す（使わないなら削除OK）
+};
 
-interface TimelineItemRowProps {
+type Props = {
   item: TimelineItem;
-  mounted?: boolean;
   sortMode: SortMode;
   categoryOptions: CategoryOption[];
   isFirst: boolean;
   isLast: boolean;
   onChange: (id: string, patch: Partial<TimelineItem>) => void;
   onDelete: (id: string) => void;
-  onMove: (id: string, direction: "up" | "down") => void;
-}
-
-const formatAmount = (value: number) =>
-  value.toLocaleString("ja-JP", { maximumFractionDigits: 0 });
-
-const categoryEmoji = (c: TimelineCategory) => {
-  switch (c) {
-    case "move":
-      return "🚉";
-    case "meal":
-      return "🍽️";
-    case "sight":
-      return "📷";
-    case "stay":
-      return "🏨";
-    case "activity":
-      return "🎫";
-    case "shopping":
-      return "🛍️";
-    default:
-      return "📌";
-  }
+  onMove: (id: string, dir: "up" | "down") => void;
 };
 
 export default function TimelineItemRow({
   item,
   sortMode,
-  categoryOptions,
   isFirst,
   isLast,
   onChange,
@@ -134,10 +108,14 @@ export default function TimelineItemRow({
     color: "#111827",
   } as const;
 
-  return (
+      return (
     <Box
+      bg="white"
+      border="1px solid #f1f1f0"
+      borderRadius="16px"
+      p={4}
+      boxShadow="0 8px 20px rgba(0,0,0,0.04)"
       position="relative"
-      pl={{ base: 0, md: "96px" }} // 880px相当は sxで厳密化}
     >
       {/* time label (>=880px) */}
       <Text
@@ -165,7 +143,7 @@ export default function TimelineItemRow({
         borderRadius="full"
         bg={PRIMARY}
         border="3px solid #fff"
-        boxShadow="0 0 0 2px #e5e7eb" // ← var(--line) を固定色に
+        boxShadow="0 0 0 2px #e5e7eb"
         display={isWide ? "block" : "none"}
       />
 
@@ -178,6 +156,7 @@ export default function TimelineItemRow({
         boxShadow="0 12px 34px rgba(0,0,0,0.04)"
       >
         <Flex gap={3} align="flex-start">
+          {/* emoji icon */}
           <Box
             w="40px"
             h="40px"
@@ -192,6 +171,7 @@ export default function TimelineItemRow({
             {categoryEmoji(item.category)}
           </Box>
 
+          {/* main content */}
           <Box flex={1} minW={0}>
             {/* title */}
             <Input
@@ -269,7 +249,6 @@ export default function TimelineItemRow({
                     display: "block",
                   }}
                   onError={(e) => {
-                    // 画像読み込み失敗時に「壊れた画像」を隠す
                     (e.currentTarget as HTMLImageElement).style.display =
                       "none";
                   }}

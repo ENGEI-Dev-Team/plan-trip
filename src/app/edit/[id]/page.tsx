@@ -1,9 +1,10 @@
 "use client";
 
-import { Box, Button, Flex, Text } from "@chakra-ui/react";
-import { useParams, useRouter } from "next/navigation";
-import { PrintNavigationButton } from "@/components/atoms/PrintNavigationButton";
+import { Box, Button, Flex, Text, Input } from "@chakra-ui/react";
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import TimelineEditor from "@/components/timeline/TimelineEditor";
+import { PrintNavigationButton } from "@/components/atoms/PrintNavigationButton";
 
 const PRIMARY = "#0ea5e9";
 
@@ -11,10 +12,63 @@ export default function EditPage() {
   const params = useParams();
   const itineraryId = params.id as string;
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [title, setTitle] = useState(
+    () => searchParams.get("title") ?? "旅のタイムラインを編集",
+  );
+  const [prefecture] = useState(() => searchParams.get("pref") ?? "東京都");
+
+  const [startDate] = useState(() => searchParams.get("start") ?? "");
+  const [endDate] = useState(() => searchParams.get("end") ?? "");
+
+  const [activeDayIndex, setActiveDayIndex] = useState(0);
+
+  // ✅ ①② 共有URL用state
+  const [shareUrl, setShareUrl] = useState("");
+  const [shortUrl, setShortUrl] = useState<string | null>(null);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+const [shareUrl, setShareUrl] = useState<string>(
+  typeof window !== "undefined" ? window.location.href : ""
+);
+
+  const days = useMemo<DayTab[]>(() => {
+    const built = buildDays(startDate, endDate);
+    if (built.length > 0) return built;
+
+    return [
+      { index: 0, dateStr: "day-1", label: "1日目" },
+      { index: 1, dateStr: "day-2", label: "2日目" },
+      { index: 2, dateStr: "day-3", label: "3日目" },
+    ];
+  }, [startDate, endDate]);
+
+  const maxDayIndex = Math.max(days.length - 1, 0);
+  const activeDayIndexSafe = Math.min(activeDayIndex, maxDayIndex);
+
+  // ✅ ③ コピー関数（EditPage内・returnの前）
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setToastMsg("コピーしました");
+      setTimeout(() => setToastMsg(null), 1200);
+    } catch {
+      setToastMsg("コピーに失敗しました");
+      setTimeout(() => setToastMsg(null), 1200);
+    }
+  };
+
+  // ✅ 仮の短縮リンク生成（後でAPIに差し替える場所）
+  const createShortLink = async () => {
+    const fake = `https://example.com/s/${itineraryId.slice(0, 8)}`;
+    setShortUrl(fake);
+    await copyToClipboard(fake);
+  };
 
   return (
     <Flex direction="column" h="100vh" bg="#f8f8f7" color="#1f2937">
-      {/* sticky header */}
+      {/* header */}
       <Flex
         as="header"
         position="sticky"
@@ -30,6 +84,7 @@ export default function EditPage() {
         justify="space-between"
         boxShadow="0 2px 14px rgba(0,0,0,0.04)"
         gap={3}
+        role="group"
       >
         <Button
           size="sm"
@@ -39,20 +94,34 @@ export default function EditPage() {
           borderRadius="full"
           _hover={{ bg: "#e5e7eb" }}
           onClick={() => router.push("/")}
+          flexShrink={0}
         >
           ← ホームへ
         </Button>
 
-        <Box minW={0} flex={1}>
-          <Text fontWeight="700" fontSize="md" noOfLines={1}>
-            旅のタイムラインを編集
-          </Text>
-          <Text color="#6b7280" fontSize="sm" noOfLines={1}>
-            ID: {itineraryId.slice(0, 8)}…
-          </Text>
+        {/* title center */}
+        <Box
+          position="absolute"
+          left="50%"
+          transform="translateX(-50%)"
+          maxW="520px"
+          w="70%"
+          px={2}
+        >
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.currentTarget.value)}
+            textAlign="center"
+            fontWeight="800"
+            border="none"
+            bg="transparent"
+            _focusVisible={{ outline: "none" }}
+            placeholder="旅行タイトル"
+          />
         </Box>
 
-        <Flex align="center" gap={2}>
+        {/* right */}
+        <Flex align="center" gap={2} flexShrink={0} ml="auto">
           <Box
             px={3}
             py={1}
@@ -63,24 +132,83 @@ export default function EditPage() {
             fontSize="sm"
             whiteSpace="nowrap"
           >
-            Editing
+            {prefecture}
           </Box>
           <Button
             size="sm"
-            colorPalette="blue"
+            borderRadius="full"
+            fontWeight="900"
+            color="white"
+            px={4}
+            background="conic-gradient(from 180deg at 50% 50%, #00E5FF, #7C3AED, #FF00CC, #FF3D00, #FFEA00, #7CFF00, #00FF85, #00E5FF)"
+            boxShadow="0 12px 26px rgba(0,0,0,0.18)"
+            border="1px solid rgba(255,255,255,0.35)"
+            _hover={{
+              transform: "translateY(-1px) scale(1.02)",
+              boxShadow: "0 16px 34px rgba(0,0,0,0.22)",
+            }}
+            _active={{ transform: "translateY(0px) scale(0.99)" }}
             onClick={() =>
               window.dispatchEvent(new CustomEvent("tripbook:test-save"))
             }
           >
-            保存テスト
+            できた！
           </Button>
           <PrintNavigationButton itineraryId={itineraryId} />
         </Flex>
       </Flex>
 
+      {/* ✅ ④ 共有UI（ID表示の代わり） */}
+      <Box px={{ base: 3, md: 5 }} pt={2}>
+        <Flex align="center" gap={3} wrap="wrap">
+          <Text color="#6b7280" fontSize="xs">
+            共有（URL）
+          </Text>
+
+          <Button
+            size="xs"
+            variant="outline"
+            borderRadius="full"
+            onClick={() => copyToClipboard(shareUrl)}
+            disabled={!shareUrl}
+          >
+            URLをコピー
+          </Button>
+
+          <Button
+            size="xs"
+            variant="outline"
+            borderRadius="full"
+            onClick={createShortLink}
+          >
+            短い共有リンクを作成
+          </Button>
+
+          <Text color="#9ca3af" fontSize="xs">
+            ※内容が多くURLが長い場合（有効期限30日／期限後は閲覧不可・再発行可）
+          </Text>
+
+          {shortUrl && (
+            <Text color="#6b7280" fontSize="xs">
+              短縮：{shortUrl}
+            </Text>
+          )}
+
+          {toastMsg && (
+            <Text color="#0ea5e9" fontSize="xs" fontWeight="700">
+              {toastMsg}
+            </Text>
+          )}
+        </Flex>
+      </Box>
+
       {/* content */}
       <Box flex={1} minH={0}>
-        <TimelineEditor />
+        <TimelineEditor
+          days={days}
+          activeDayIndex={activeDayIndexSafe}
+          onActiveDayChange={(i) => setActiveDayIndex(Math.min(i, maxDayIndex))}
+        />
       </Box>
     </Flex>
   );

@@ -1,4 +1,4 @@
-import { Badge, Box, Card, Heading, Stack, Text } from "@chakra-ui/react";
+import { Badge, Box, Stack, Text } from "@chakra-ui/react";
 import { TimelineCategory } from "@/types/timeline";
 import PeopleCounter from "./PeopleCounter";
 
@@ -29,28 +29,13 @@ export default function TimelineSummary({
 }: TimelineSummaryProps) {
   return (
     <Stack gap={4}>
-      <Stack gap={1}>
-        <Text
-          fontSize="xs"
-          textTransform="uppercase"
-          letterSpacing="0.3em"
-          color="gray.500"
-        >
-          費用サマリー
-        </Text>
-        <Heading size="md" color="gray.800">
-          Budget
-        </Heading>
-        <Text fontSize="sm" color="gray.500">
-          カテゴリ別の合計と 1 人あたりの目安をリアルタイムに確認できます。
-        </Text>
-      </Stack>
+      {/* ✅ 説明ブロック（費用サマリー/Budget/説明文）は削除 */}
 
       <Box
         borderRadius="xl"
         border="1px solid"
-        borderColor="pink.200"
-        bg="pink.50"
+        borderColor="rgba(14,165,233,0.25)"
+        bg="white"
         px={4}
         py={3}
       >
@@ -58,14 +43,14 @@ export default function TimelineSummary({
           fontSize="xs"
           textTransform="uppercase"
           letterSpacing="0.3em"
-          color="pink.500"
+          color="#0ea5e9"
         >
           Total
         </Text>
         <Text fontSize="2xl" fontWeight="semibold" color="gray.800">
           {formatCurrency(totalAmount)}
         </Text>
-        <Text fontSize="sm" color="pink.500">
+        <Text fontSize="sm" color="#0ea5e9">
           1 人あたり{" "}
           <Text as="span" fontWeight="semibold">
             {formatCurrency(Math.round(perPersonAmount))}
