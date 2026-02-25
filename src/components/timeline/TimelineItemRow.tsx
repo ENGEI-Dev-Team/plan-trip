@@ -108,7 +108,7 @@ export default function TimelineItemRow({
     color: "#111827",
   } as const;
 
-    return (
+      return (
     <Box
       bg="white"
       border="1px solid #f1f1f0"
@@ -363,4 +363,4 @@ export default function TimelineItemRow({
       </Box>
     </Box>
   );
-}_
+}
