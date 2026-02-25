@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import { ItineraryData } from "@/types/itinerary";
 import { ItineraryDraft } from "@/types/itinerory";
 import type { GetShareResponse } from "@/types/share";
@@ -8,9 +8,9 @@ import { useRouter } from "next/navigation";
 import { ItineraryPreviewLayout } from "@/components/templates/ItineraryPreviewLayout";
 
 type PreviewPageProps = {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
 
 const toItineraryData = (draft: ItineraryDraft): ItineraryData => {
@@ -37,6 +37,7 @@ const toItineraryData = (draft: ItineraryDraft): ItineraryData => {
 };
 
 export default function PreviewPage({ params }: PreviewPageProps) {
+  const { id } = use(params);
   const [draft, setDraft] = useState<ItineraryDraft | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -44,7 +45,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
   useEffect(() => {
     const fetchShare = async () => {
       try {
-        const response = await fetch(`/api/shares/${params.id}`);
+        const response = await fetch(`/api/shares/${id}`);
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));
           throw new Error(data?.error ?? "共有リンクの取得に失敗しました");
@@ -58,7 +59,7 @@ export default function PreviewPage({ params }: PreviewPageProps) {
       }
     };
     fetchShare();
-  }, [params.id]);
+  }, [id]);
 
   const itineraryData = useMemo(
     () => (draft ? toItineraryData(draft) : null),
