@@ -4,6 +4,7 @@ import { Box, Button, Flex, Text, Input } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import TimelineEditor from "@/components/timeline/TimelineEditor";
+import { PrintNavigationButton } from "@/components/atoms/PrintNavigationButton";
 
 const PRIMARY = "#0ea5e9";
 
