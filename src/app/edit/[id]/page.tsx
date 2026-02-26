@@ -138,10 +138,10 @@ const [shareUrl, setShareUrl] = useState<string>(
           
           </Box>
         
-        // 保存(プレビュー画面繊維ボタン)
+        {/* 保存(プレビュー画面繊維ボタン) */}
           < SaveTripButton />
 
-        // 印刷ボタン
+        {/* 印刷ボタン */}
           <PrintNavigationButton itineraryId={itineraryId} />
         
         </Flex>
