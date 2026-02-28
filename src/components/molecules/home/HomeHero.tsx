@@ -37,20 +37,6 @@ export const HomeHero = ({ onCreateClick }: HomeHeroProps) => {
 
       {/* 中身 */}
       <Box position="relative" zIndex={1} px={6} pt={12} pb={8} maxW="720px">
-        {/*<Box
-          display="inline-block"
-          px={4}
-          py={2}
-          borderRadius="10px"
-          bg="#dbeafe"
-          color="#0f172a"
-          fontWeight="700"
-          fontSize="sm"
-          mb={4}
-          textAlign="center"
-        >
-          旅のしおりを、すぐに。
-        </Box>*/}
 
         <Heading
           as="h1"
