@@ -88,6 +88,7 @@ const SUMMARY_CATEGORY_META = Object.fromEntries(
 const DEFAULT_ITEMS: TimelineItem[] = [
   {
     id: "sample-1",
+    dayIndex: 1,
     time: "09:00",
     category: "move",
     title: "羽田空港を出発",
@@ -98,6 +99,7 @@ const DEFAULT_ITEMS: TimelineItem[] = [
   },
   {
     id: "sample-2",
+    dayIndex: 1,
     time: "12:00",
     category: "meal",
     title: "築地でランチ",
@@ -108,6 +110,7 @@ const DEFAULT_ITEMS: TimelineItem[] = [
   },
   {
     id: "sample-3",
+    dayIndex: 1,
     time: "15:30",
     category: "sight",
     title: "浅草寺と周辺散策",
@@ -140,11 +143,15 @@ const loadItemsFromStorage = (storageKey: string): TimelineItem[] => {
   }
 };
 
-const createEmptyItem = (orderIndex: number): TimelineItem => ({
+const createEmptyItem = (
+  orderIndex: number,
+  dayIndex: number,
+): TimelineItem => ({
   id:
     typeof crypto !== "undefined" && "randomUUID" in crypto
       ? crypto.randomUUID()
       : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+  dayIndex,
   time: "",
   category: "other",
   title: "",
@@ -213,10 +220,9 @@ export default function TimelineEditor() {
   const timelineStorageKey = `${TIMELINE_STORAGE_KEY_PREFIX}.${itineraryId}`;
   const peopleStorageKey = `${PEOPLE_STORAGE_KEY_PREFIX}.${itineraryId}`;
   const publishArgsKey = `${PUBLISH_ARGS_KEY_PREFIX}.${itineraryId}`;
-  const [isDesktop, showLine] = useMediaQuery(
-    ["(min-width: 961px)", "(min-width: 880px)"],
-    { fallback: [false, false] },
-  );
+  const [isDesktop] = useMediaQuery(["(min-width: 961px)"], {
+    fallback: [false],
+  });
 
   const [items, setItems] = useState<TimelineItem[]>(() =>
     loadItemsFromStorage(timelineStorageKey),
@@ -318,6 +324,9 @@ export default function TimelineEditor() {
       const storedArgs = storedArgsRaw
         ? (JSON.parse(storedArgsRaw) as Partial<ItineraryPublishArgs>)
         : null;
+      const publishItems = items.filter(
+        (item) => typeof item.dayIndex === "number",
+      );
       const mergedArgs: ItineraryPublishArgs = {
         itinerary_id: itineraryId,
         title: storedArgs?.title ?? "",
@@ -325,7 +334,7 @@ export default function TimelineEditor() {
         start_date: storedArgs?.start_date ?? "",
         end_date: storedArgs?.end_date ?? "",
         people_count: storedArgs?.people_count ?? peopleCount,
-        items,
+        items: publishItems,
       };
       console.log("[publish] merged defaultValues + items", mergedArgs);
       window.localStorage.setItem(publishArgsKey, JSON.stringify(mergedArgs));
@@ -378,9 +387,10 @@ export default function TimelineEditor() {
   }, [showSaveNotice]);
 
   const sortedItems = useMemo(() => {
-    const cloned = [...items];
+    const visibleItems = items.filter((item) => item.dayIndex === activeDay + 1);
+    const cloned = [...visibleItems];
     return cloned.sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
-  }, [items]);
+  }, [items, activeDay]);
 
   const { categoryTotals, totalAmount, perPersonAmount } = useMemo(() => {
     const totals: Record<TimelineCategory, number> = {
@@ -393,7 +403,10 @@ export default function TimelineEditor() {
       other: 0,
     };
     let total = 0;
-    for (const item of items) {
+    const trackedItems = items.filter(
+      (item) => typeof item.dayIndex === "number",
+    );
+    for (const item of trackedItems) {
       totals[item.category] += item.amount || 0;
       total += item.amount || 0;
     }
@@ -419,7 +432,7 @@ export default function TimelineEditor() {
     setItems((prev) => {
       const nextIndex =
         prev.length > 0 ? Math.max(...prev.map((it) => it.orderIndex)) + 1 : 0;
-      return [...prev, createEmptyItem(nextIndex)];
+      return [...prev, createEmptyItem(nextIndex, activeDay + 1)];
     });
   };
 
@@ -457,17 +470,6 @@ export default function TimelineEditor() {
             pb={!isDesktop ? "140px" : "24px"}
             position="relative"
           >
-            {showLine && (
-              <Box
-                position="absolute"
-                left="58px"
-                top="10px"
-                bottom="10px"
-                w="2px"
-                bg="#e5e7eb"
-              />
-            )}
-
             {isEmpty ? (
               <Box
                 bg="white"

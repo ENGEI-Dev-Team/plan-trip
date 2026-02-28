@@ -24,15 +24,17 @@ export const toTimelineDayItemInserts = (
   itineraryId: string,
   items: TimelineItem[],
 ): TimelineDayItemInsert[] => {
-  return items.map((item, index) => ({
-    itinerary_id: itineraryId,
-    day_index: 1,
-    start_time: normalizeTime(item.time),
-    end_time: null,
-    category: item.category ?? "other",
-    title: item.title ?? "",
-    memo: item.memo ?? null,
-    cost_jpy: item.amount ?? 0,
-    sort_order: item.orderIndex > 0 ? item.orderIndex : index + 1,
-  }));
+  return items
+    .filter((item) => typeof item.dayIndex === "number")
+    .map((item, index) => ({
+      itinerary_id: itineraryId,
+      day_index: item.dayIndex as number,
+      start_time: normalizeTime(item.time),
+      end_time: null,
+      category: item.category ?? "other",
+      title: item.title ?? "",
+      memo: item.memo ?? null,
+      cost_jpy: item.amount ?? 0,
+      sort_order: item.orderIndex > 0 ? item.orderIndex : index + 1,
+    }));
 };
