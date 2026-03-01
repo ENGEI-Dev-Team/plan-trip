@@ -1,12 +1,14 @@
 "use client";
 
 import { Box, Button, Flex, Text, Input } from "@chakra-ui/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import TimelineEditor from "@/components/timeline/TimelineEditor";
 import { PrintNavigationButton } from "@/components/atoms/PrintNavigationButton";
-
-const PRIMARY = "#0ea5e9";
+import SaveTripButton from "@/components/atoms/SaveTripButton";
+import { PRIMARY } from "@/lib/constants";
+import type { DayTab } from "@/lib/day-utils";
+import { buildDays } from "@/lib/day-utils";
 
 export default function EditPage() {
   const params = useParams();
@@ -24,19 +26,23 @@ export default function EditPage() {
 
   const [activeDayIndex, setActiveDayIndex] = useState(0);
 
-  // ✅ ①② 共有URL用state
-  const [shareUrl, setShareUrl] = useState("");
+  /* =========================
+     共有URL関連（state不要）
+     ========================= */
+  const shareUrl =
+    typeof window !== "undefined" ? window.location.href : "";
+
   const [shortUrl, setShortUrl] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
-const [shareUrl, setShareUrl] = useState<string>(
-  typeof window !== "undefined" ? window.location.href : ""
-);
-
+  /* =========================
+     Day tabs
+     ========================= */
   const days = useMemo<DayTab[]>(() => {
     const built = buildDays(startDate, endDate);
     if (built.length > 0) return built;
 
+    // フォールバック
     return [
       { index: 0, dateStr: "day-1", label: "1日目" },
       { index: 1, dateStr: "day-2", label: "2日目" },
@@ -47,7 +53,9 @@ const [shareUrl, setShareUrl] = useState<string>(
   const maxDayIndex = Math.max(days.length - 1, 0);
   const activeDayIndexSafe = Math.min(activeDayIndex, maxDayIndex);
 
-  // ✅ ③ コピー関数（EditPage内・returnの前）
+  /* =========================
+     utils
+     ========================= */
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -59,7 +67,6 @@ const [shareUrl, setShareUrl] = useState<string>(
     }
   };
 
-  // ✅ 仮の短縮リンク生成（後でAPIに差し替える場所）
   const createShortLink = async () => {
     const fake = `https://example.com/s/${itineraryId.slice(0, 8)}`;
     setShortUrl(fake);
@@ -134,31 +141,13 @@ const [shareUrl, setShareUrl] = useState<string>(
           >
             {prefecture}
           </Box>
-          <Button
-            size="sm"
-            borderRadius="full"
-            fontWeight="900"
-            color="white"
-            px={4}
-            background="conic-gradient(from 180deg at 50% 50%, #00E5FF, #7C3AED, #FF00CC, #FF3D00, #FFEA00, #7CFF00, #00FF85, #00E5FF)"
-            boxShadow="0 12px 26px rgba(0,0,0,0.18)"
-            border="1px solid rgba(255,255,255,0.35)"
-            _hover={{
-              transform: "translateY(-1px) scale(1.02)",
-              boxShadow: "0 16px 34px rgba(0,0,0,0.22)",
-            }}
-            _active={{ transform: "translateY(0px) scale(0.99)" }}
-            onClick={() =>
-              window.dispatchEvent(new CustomEvent("tripbook:test-save"))
-            }
-          >
-            できた！
-          </Button>
+
+          <SaveTripButton />
           <PrintNavigationButton itineraryId={itineraryId} />
         </Flex>
       </Flex>
 
-      {/* ✅ ④ 共有UI（ID表示の代わり） */}
+      {/* 共有UI */}
       <Box px={{ base: 3, md: 5 }} pt={2}>
         <Flex align="center" gap={3} wrap="wrap">
           <Text color="#6b7280" fontSize="xs">
@@ -185,7 +174,7 @@ const [shareUrl, setShareUrl] = useState<string>(
           </Button>
 
           <Text color="#9ca3af" fontSize="xs">
-            ※内容が多くURLが長い場合（有効期限30日／期限後は閲覧不可・再発行可）
+            ※有効期限30日（期限後は閲覧不可・再発行可）
           </Text>
 
           {shortUrl && (
@@ -207,7 +196,9 @@ const [shareUrl, setShareUrl] = useState<string>(
         <TimelineEditor
           days={days}
           activeDayIndex={activeDayIndexSafe}
-          onActiveDayChange={(i) => setActiveDayIndex(Math.min(i, maxDayIndex))}
+          onActiveDayChange={(i) =>
+            setActiveDayIndex(Math.min(i, maxDayIndex))
+          }
         />
       </Box>
     </Flex>
