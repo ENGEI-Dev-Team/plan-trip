@@ -13,23 +13,34 @@ import {
   Textarea,
 } from "@chakra-ui/react";
 import { SortMode, TimelineCategory, TimelineItem } from "@/types/timeline";
+import { categoryOptions } from "@/lib/category-options";
+import { PRIMARY } from "@/lib/constants";
+import { categoryEmoji } from "@/lib/category-emoji";
+import { formatAmount } from "@/lib/format"; // ✅ 追加
+
+/* ===============================
+   型定義
+=============================== */
 
 type CategoryOption = {
   value: TimelineCategory;
   label: string;
-  badgeClass?: string; // 既存に合わせて残す（使わないなら削除OK）
+  badgeClass?: string;
 };
 
-type Props = {
+export type TimelineItemRowProps = {
   item: TimelineItem;
   sortMode: SortMode;
-  categoryOptions: CategoryOption[];
   isFirst: boolean;
   isLast: boolean;
   onChange: (id: string, patch: Partial<TimelineItem>) => void;
   onDelete: (id: string) => void;
   onMove: (id: string, dir: "up" | "down") => void;
 };
+
+/* ===============================
+   Component
+=============================== */
 
 export default function TimelineItemRow({
   item,
@@ -53,9 +64,10 @@ export default function TimelineItemRow({
       mq.removeEventListener?.("change", update);
     };
   }, []);
+
   const currentCategory = useMemo(
     () => categoryOptions.find((o) => o.value === item.category),
-    [categoryOptions, item.category],
+    [item.category],
   );
 
   const [amountInput, setAmountInput] = useState(
@@ -108,7 +120,7 @@ export default function TimelineItemRow({
     color: "#111827",
   } as const;
 
-      return (
+  return (
     <Box
       bg="white"
       border="1px solid #f1f1f0"
@@ -117,7 +129,7 @@ export default function TimelineItemRow({
       boxShadow="0 8px 20px rgba(0,0,0,0.04)"
       position="relative"
     >
-      {/* time label (>=880px) */}
+      {/* time label */}
       <Text
         position="absolute"
         left={0}
@@ -125,7 +137,7 @@ export default function TimelineItemRow({
         w="64px"
         textAlign="right"
         pr={3}
-        fontFamily="ui-monospace, SFMono-Regular, Menlo, Consolas, Liberation Mono, monospace"
+        fontFamily="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
         color="#6b7280"
         fontWeight="600"
         display={isWide ? "block" : "none"}
@@ -133,7 +145,7 @@ export default function TimelineItemRow({
         {item.time || "--:--"}
       </Text>
 
-      {/* dot (>=880px) */}
+      {/* dot */}
       <Box
         position="absolute"
         left="70px"
@@ -156,7 +168,7 @@ export default function TimelineItemRow({
         boxShadow="0 12px 34px rgba(0,0,0,0.04)"
       >
         <Flex gap={3} align="flex-start">
-          {/* emoji icon */}
+          {/* emoji */}
           <Box
             w="40px"
             h="40px"
@@ -168,12 +180,12 @@ export default function TimelineItemRow({
             color="#0f172a"
             flexShrink={0}
           >
-            {categoryEmoji(item.category)}
+            {/* ✅ 修正ポイント */}
+            {categoryEmoji[item.category ?? "other"]}
           </Box>
 
-          {/* main content */}
+          {/* main */}
           <Box flex={1} minW={0}>
-            {/* title */}
             <Input
               value={item.title}
               placeholder="スポット / 行き先など"
@@ -182,17 +194,11 @@ export default function TimelineItemRow({
               }
               fontSize="lg"
               fontWeight="700"
-              color="#1f2937"
-              _placeholder={{ color: "#9ca3af" }}
               bg="transparent"
               border="none"
-              boxShadow="none"
               px={0}
-              h="auto"
-              _focusVisible={{ boxShadow: "none" }}
             />
 
-            {/* memo */}
             <Textarea
               value={item.memo}
               placeholder="補足・移動手段・リンクなど"
@@ -201,70 +207,17 @@ export default function TimelineItemRow({
               }
               mt={2}
               rows={2}
-              color="#6b7280"
-              fontSize="md"
-              _placeholder={{ color: "#9ca3af" }}
               bg="transparent"
               border="none"
-              boxShadow="none"
               px={0}
               resize="none"
-              _focusVisible={{ boxShadow: "none" }}
             />
-
-            {/* photo url input */}
-            <Input
-              mt={3}
-              value={item.photoUrl ?? ""}
-              placeholder="写真URL（任意） https://..."
-              onChange={(e) =>
-                onChange(item.id, { photoUrl: e.currentTarget.value })
-              }
-              size="sm"
-              border="1px solid #e5e7eb"
-              borderRadius="10px"
-              bg="white"
-              color="#111827"
-              _placeholder={{ color: "#9ca3af" }}
-            />
-
-            {/* preview */}
-            {!!(item.photoUrl && item.photoUrl.trim()) && (
-              <Box
-                mt={3}
-                borderRadius="16px"
-                overflow="hidden"
-                border="1px solid #e5e7eb"
-                boxShadow="0 10px 24px rgba(0,0,0,0.06)"
-                bg="#f3f4f6"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={item.photoUrl.trim()}
-                  alt="写真"
-                  style={{
-                    width: "100%",
-                    height: "260px",
-                    objectFit: "cover",
-                    display: "block",
-                  }}
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.display =
-                      "none";
-                  }}
-                />
-                <Text fontSize="xs" color="#6b7280" px={3} py={2}>
-                  ※表示されない場合：URLが https で公開されているか /
-                  アクセス制限がないか確認してください
-                </Text>
-              </Box>
-            )}
 
             {/* pills */}
             <Flex wrap="wrap" gap={3} mt={3} align="center">
-              {/* category pill */}
+              {/* category */}
               <Box {...pillBase}>
-                <Badge colorPalette="gray" fontSize="xs">
+                <Badge fontSize="xs">
                   {currentCategory?.label ?? "カテゴリ"}
                 </Badge>
                 <NativeSelect.Root>
@@ -287,7 +240,7 @@ export default function TimelineItemRow({
                 </NativeSelect.Root>
               </Box>
 
-              {/* amount pill */}
+              {/* amount */}
               <Box {...pillBase}>
                 <Text color="#6b7280">¥</Text>
                 <Input
@@ -300,11 +253,13 @@ export default function TimelineItemRow({
                   {...pillInputBase}
                 />
                 {item.amount > 0 ? (
-                  <Text color="#6b7280">（¥{formatAmount(item.amount)}）</Text>
+                  <Text color="#6b7280">
+                    （{formatAmount(item.amount)}）
+                  </Text>
                 ) : null}
               </Box>
 
-              {/* time pill */}
+              {/* time */}
               <Box {...pillBase}>
                 <Text>🕒</Text>
                 <Input
@@ -319,16 +274,10 @@ export default function TimelineItemRow({
             </Flex>
 
             {/* actions */}
-            <Flex
-              mt={3}
-              align="center"
-              justify="space-between"
-              gap={3}
-              wrap="wrap"
-            >
+            <Flex mt={3} align="center" justify="space-between">
               <HStack gap={2}>
                 {sortMode === "manual" && (
-                  <HStack gap={2}>
+                  <>
                     <Button
                       size="xs"
                       variant="outline"
@@ -345,7 +294,7 @@ export default function TimelineItemRow({
                     >
                       ↓
                     </Button>
-                  </HStack>
+                  </>
                 )}
               </HStack>
 

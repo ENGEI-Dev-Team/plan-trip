@@ -20,8 +20,8 @@ import PublishShareActions from "./PublishShareActions";
 import { TripAlbumCard } from "@/components/molecules/TripAlbumCard";
 import { UsefulToolsCard } from "@/components/molecules/UsefulToolsCard";
 import { SaveStatusToast } from "@/components/molecules/SaveStatusToast";
+import { PRIMARY } from "@/lib/constants";
 
-const PRIMARY = "#0ea5e9";
 const TIMELINE_STORAGE_KEY_PREFIX = "tripbook.timeline-items.v1";
 const PEOPLE_STORAGE_KEY_PREFIX = "tripbook.people-count.v1";
 const PUBLISH_ARGS_KEY_PREFIX = "tripbook.publish-args.v1";

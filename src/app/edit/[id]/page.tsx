@@ -5,10 +5,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import TimelineEditor from "@/components/timeline/TimelineEditor";
 import { PrintNavigationButton } from "@/components/atoms/PrintNavigationButton";
-import SaveTripButton from "@/components/atoms/SaveTripButton"
-
-
-const PRIMARY = "#0ea5e9";
+import SaveTripButton from "@/components/atoms/SaveTripButton";
+import { PRIMARY } from "@/lib/constants";
+import type { DayTab } from "@/lib/day-utils";  
+import { buildDays } from "@/lib/day-utils";     
 
 export default function EditPage() {
   const params = useParams();
@@ -26,14 +26,17 @@ export default function EditPage() {
 
   const [activeDayIndex, setActiveDayIndex] = useState(0);
 
-  // ✅ ①② 共有URL用state
-  const [shareUrl, setShareUrl] = useState("");
+  // ✅ 共有URL用state（1回だけ定義）
+  const [shareUrl, setShareUrl] = useState<string>("");
   const [shortUrl, setShortUrl] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
-const [shareUrl, setShareUrl] = useState<string>(
-  typeof window !== "undefined" ? window.location.href : ""
-);
+  // 初期URLセット
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setShareUrl(window.location.href);
+    }
+  }, []);
 
   const days = useMemo<DayTab[]>(() => {
     const built = buildDays(startDate, endDate);
@@ -49,7 +52,7 @@ const [shareUrl, setShareUrl] = useState<string>(
   const maxDayIndex = Math.max(days.length - 1, 0);
   const activeDayIndexSafe = Math.min(activeDayIndex, maxDayIndex);
 
-  // ✅ ③ コピー関数（EditPage内・returnの前）
+  // コピー関数
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -61,7 +64,7 @@ const [shareUrl, setShareUrl] = useState<string>(
     }
   };
 
-  // ✅ 仮の短縮リンク生成（後でAPIに差し替える場所）
+  // 仮の短縮リンク生成
   const createShortLink = async () => {
     const fake = `https://example.com/s/${itineraryId.slice(0, 8)}`;
     setShortUrl(fake);
@@ -135,19 +138,17 @@ const [shareUrl, setShareUrl] = useState<string>(
             whiteSpace="nowrap"
           >
             {prefecture}
-          
           </Box>
-        
-        {/* 保存(プレビュー画面繊維ボタン) */}
-          < SaveTripButton />
 
-        {/* 印刷ボタン */}
+          {/* 保存 */}
+          <SaveTripButton />
+
+          {/* 印刷 */}
           <PrintNavigationButton itineraryId={itineraryId} />
-        
         </Flex>
       </Flex>
 
-      {/* ✅ ④ 共有UI（ID表示の代わり） */}
+      {/* 共有UI */}
       <Box px={{ base: 3, md: 5 }} pt={2}>
         <Flex align="center" gap={3} wrap="wrap">
           <Text color="#6b7280" fontSize="xs">
@@ -174,7 +175,7 @@ const [shareUrl, setShareUrl] = useState<string>(
           </Button>
 
           <Text color="#9ca3af" fontSize="xs">
-            ※内容が多くURLが長い場合（有効期限30日／期限後は閲覧不可・再発行可）
+            ※有効期限30日（期限後は閲覧不可・再発行可）
           </Text>
 
           {shortUrl && (
