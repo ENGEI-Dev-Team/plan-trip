@@ -13,7 +13,7 @@ export function buildDays(startDate: string, endDate: string): DayTab[] {
   if (isNaN(start.getTime()) || isNaN(end.getTime())) return [];
 
   const days: DayTab[] = [];
-  let current = new Date(start);
+  const current = new Date(start);
   let index = 0;
 
   while (current <= end) {
