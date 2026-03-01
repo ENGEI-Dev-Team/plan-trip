@@ -1,14 +1,14 @@
 "use client";
 
 import { Box, Button, Flex, Text, Input } from "@chakra-ui/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import TimelineEditor from "@/components/timeline/TimelineEditor";
 import { PrintNavigationButton } from "@/components/atoms/PrintNavigationButton";
 import SaveTripButton from "@/components/atoms/SaveTripButton";
 import { PRIMARY } from "@/lib/constants";
-import type { DayTab } from "@/lib/day-utils";  
-import { buildDays } from "@/lib/day-utils";     
+import type { DayTab } from "@/lib/day-utils";
+import { buildDays } from "@/lib/day-utils";
 
 export default function EditPage() {
   const params = useParams();
@@ -26,22 +26,23 @@ export default function EditPage() {
 
   const [activeDayIndex, setActiveDayIndex] = useState(0);
 
-  // ✅ 共有URL用state（1回だけ定義）
-  const [shareUrl, setShareUrl] = useState<string>("");
+  /* =========================
+     共有URL関連（state不要）
+     ========================= */
+  const shareUrl =
+    typeof window !== "undefined" ? window.location.href : "";
+
   const [shortUrl, setShortUrl] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
-  // 初期URLセット
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setShareUrl(window.location.href);
-    }
-  }, []);
-
+  /* =========================
+     Day tabs
+     ========================= */
   const days = useMemo<DayTab[]>(() => {
     const built = buildDays(startDate, endDate);
     if (built.length > 0) return built;
 
+    // フォールバック
     return [
       { index: 0, dateStr: "day-1", label: "1日目" },
       { index: 1, dateStr: "day-2", label: "2日目" },
@@ -52,7 +53,9 @@ export default function EditPage() {
   const maxDayIndex = Math.max(days.length - 1, 0);
   const activeDayIndexSafe = Math.min(activeDayIndex, maxDayIndex);
 
-  // コピー関数
+  /* =========================
+     utils
+     ========================= */
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -64,7 +67,6 @@ export default function EditPage() {
     }
   };
 
-  // 仮の短縮リンク生成
   const createShortLink = async () => {
     const fake = `https://example.com/s/${itineraryId.slice(0, 8)}`;
     setShortUrl(fake);
@@ -140,10 +142,7 @@ export default function EditPage() {
             {prefecture}
           </Box>
 
-          {/* 保存 */}
           <SaveTripButton />
-
-          {/* 印刷 */}
           <PrintNavigationButton itineraryId={itineraryId} />
         </Flex>
       </Flex>
@@ -197,7 +196,9 @@ export default function EditPage() {
         <TimelineEditor
           days={days}
           activeDayIndex={activeDayIndexSafe}
-          onActiveDayChange={(i) => setActiveDayIndex(Math.min(i, maxDayIndex))}
+          onActiveDayChange={(i) =>
+            setActiveDayIndex(Math.min(i, maxDayIndex))
+          }
         />
       </Box>
     </Flex>
