@@ -18,8 +18,8 @@ import BudgetSummaryCard from "./BudgetSummaryCard";
 import PublishShareActions from "./PublishShareActions";
 import { UsefulToolsCard } from "@/components/molecules/UsefulToolsCard";
 import { SaveStatusToast } from "@/components/molecules/SaveStatusToast";
+import { PRIMARY } from "@/lib/constants";
 
-const PRIMARY = "#0ea5e9";
 const TIMELINE_STORAGE_KEY_PREFIX = "tripbook.timeline-items.v1";
 const PEOPLE_STORAGE_KEY_PREFIX = "tripbook.people-count.v1";
 const PUBLISH_ARGS_KEY_PREFIX = "tripbook.publish-args.v1";
@@ -253,6 +253,8 @@ export default function TimelineEditor() {
   // ✅ 初回hydration完了フラグのみ設定（setState削除）
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    // items 復元
     try {
       const stored = window.localStorage.getItem(timelineStorageKey);
       if (stored) {
@@ -260,19 +262,29 @@ export default function TimelineEditor() {
         if (Array.isArray(parsed)) {
           (parsed as TimelineItem[]).map((it) => ({
             ...it,
+            orderIndex:
+              typeof it.orderIndex === "number" ? it.orderIndex : index,
+            amount: typeof it.amount === "number" ? it.amount : 0,
             photoUrl: it.photoUrl ?? "",
           }));
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setItems(normalized);
         }
       }
-    } catch {}
+    } catch {
+      // 失敗したらDEFAULTのまま
+    }
 
+    // peopleCount 復元
     try {
       const saved = window.localStorage.getItem(peopleStorageKey);
       if (saved) {
         const parsed = Number(saved);
         if (!Number.isNaN(parsed) && parsed > 0) setPeopleCount(parsed);
       }
-    } catch {}
+    } catch {
+      // 失敗したら2のまま
+    }
 
     try {
       const storedArgsRaw = window.localStorage.getItem(publishArgsKey);
@@ -438,6 +450,10 @@ export default function TimelineEditor() {
 
   const isEmpty = sortedItems.length === 0;
 
+  // ✅ ここが「線とかぶらない」ためのガター調整
+  const LINE_X = 58;
+  const CONTENT_PL = 96;
+
   return (
     <>
       <SaveStatusToast visible={showSaveNotice} type={noticeType} />
@@ -468,7 +484,6 @@ export default function TimelineEditor() {
             px={{ base: 4, md: 5 }}
             py={{ base: 5, md: 6 }}
             pb={!isDesktop ? "140px" : "24px"}
-            position="relative"
           >
             {isEmpty ? (
               <Box

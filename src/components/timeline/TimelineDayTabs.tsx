@@ -1,6 +1,5 @@
 import { Button, HStack } from "@chakra-ui/react";
-
-const PRIMARY = "#0ea5e9";
+import { PRIMARY } from "@/lib/constants";
 
 type TimelineDayTabsProps = {
   labels: string[];
