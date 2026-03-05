@@ -31,7 +31,7 @@ export default function BudgetSummaryCard({
       boxShadow="0 8px 20px rgba(0,0,0,0.04)"
     >
       <Text fontWeight="700" fontSize="sm" mb={2} color="#111827">
-        予算サマリー
+        予算
       </Text>
       <TimelineSummary
         categoryTotals={categoryTotals}
