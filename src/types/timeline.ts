@@ -11,6 +11,7 @@ export type SortMode = "time" | "manual";
 
 export interface TimelineItem {
   id: string;
+  dayIndex?: number;
   time: string;
   category: TimelineCategory;
   title: string;

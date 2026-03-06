@@ -29,7 +29,11 @@ export default function TimelineSummary({
 }: TimelineSummaryProps) {
   return (
     <Stack gap={4}>
-      {/* ✅ 説明ブロック（費用サマリー/Budget/説明文）は削除 */}
+      <Stack gap={1}>
+        <Text fontSize="sm" color="gray.500">
+          カテゴリ別の合計と 1 人あたりの目安をリアルタイムに確認できます。
+        </Text>
+      </Stack>
 
       <Box
         borderRadius="xl"

@@ -10,18 +10,16 @@ import {
   useMediaQuery,
 } from "@chakra-ui/react";
 import { useParams, useRouter } from "next/navigation";
-import { SortMode, TimelineCategory, TimelineItem } from "@/types/timeline";
+import { TimelineCategory, TimelineItem } from "@/types/timeline";
 import type { ItineraryPublishArgs } from "@/types/publish";
-import SortModeToggle from "./SortModeToggle";
 import TimelineDayTabs from "./TimelineDayTabs";
 import TimelineItemRow from "./TimelineItemRow";
 import BudgetSummaryCard from "./BudgetSummaryCard";
 import PublishShareActions from "./PublishShareActions";
-import { TripAlbumCard } from "@/components/molecules/TripAlbumCard";
 import { UsefulToolsCard } from "@/components/molecules/UsefulToolsCard";
 import { SaveStatusToast } from "@/components/molecules/SaveStatusToast";
+import { PRIMARY } from "@/lib/constants";
 
-const PRIMARY = "#0ea5e9";
 const TIMELINE_STORAGE_KEY_PREFIX = "tripbook.timeline-items.v1";
 const PEOPLE_STORAGE_KEY_PREFIX = "tripbook.people-count.v1";
 const PUBLISH_ARGS_KEY_PREFIX = "tripbook.publish-args.v1";
@@ -90,6 +88,7 @@ const SUMMARY_CATEGORY_META = Object.fromEntries(
 const DEFAULT_ITEMS: TimelineItem[] = [
   {
     id: "sample-1",
+    dayIndex: 1,
     time: "09:00",
     category: "move",
     title: "羽田空港を出発",
@@ -100,6 +99,7 @@ const DEFAULT_ITEMS: TimelineItem[] = [
   },
   {
     id: "sample-2",
+    dayIndex: 1,
     time: "12:00",
     category: "meal",
     title: "築地でランチ",
@@ -110,6 +110,7 @@ const DEFAULT_ITEMS: TimelineItem[] = [
   },
   {
     id: "sample-3",
+    dayIndex: 1,
     time: "15:30",
     category: "sight",
     title: "浅草寺と周辺散策",
@@ -142,11 +143,15 @@ const loadItemsFromStorage = (storageKey: string): TimelineItem[] => {
   }
 };
 
-const createEmptyItem = (orderIndex: number): TimelineItem => ({
+const createEmptyItem = (
+  orderIndex: number,
+  dayIndex: number,
+): TimelineItem => ({
   id:
     typeof crypto !== "undefined" && "randomUUID" in crypto
       ? crypto.randomUUID()
       : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+  dayIndex,
   time: "",
   category: "other",
   title: "",
@@ -163,6 +168,37 @@ const timeToMinutes = (value: string) => {
     return Number.MAX_SAFE_INTEGER;
   }
   return hours * 60 + mins;
+};
+
+const parseDateYMDToUTC = (value: string): number | null => {
+  if (!value) return null;
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (
+    Number.isNaN(year) ||
+    Number.isNaN(month) ||
+    Number.isNaN(day) ||
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    day > 31
+  ) {
+    return null;
+  }
+  const utc = Date.UTC(year, month - 1, day);
+  return Number.isNaN(utc) ? null : utc;
+};
+
+const calcTripDays = (startDate: string, endDate: string): number | null => {
+  const startUtc = parseDateYMDToUTC(startDate);
+  const endUtc = parseDateYMDToUTC(endDate || startDate);
+  if (startUtc === null || endUtc === null) return null;
+  const diffDays = Math.floor((endUtc - startUtc) / 86_400_000);
+  const days = diffDays + 1;
+  return days > 0 ? days : 1;
 };
 
 const loadInitialPeople = (storageKey: string): number => {
@@ -184,10 +220,9 @@ export default function TimelineEditor() {
   const timelineStorageKey = `${TIMELINE_STORAGE_KEY_PREFIX}.${itineraryId}`;
   const peopleStorageKey = `${PEOPLE_STORAGE_KEY_PREFIX}.${itineraryId}`;
   const publishArgsKey = `${PUBLISH_ARGS_KEY_PREFIX}.${itineraryId}`;
-  const [isDesktop, showLine] = useMediaQuery(
-    ["(min-width: 961px)", "(min-width: 880px)"],
-    { fallback: [false, false] },
-  );
+  const [isDesktop] = useMediaQuery(["(min-width: 961px)"], {
+    fallback: [false],
+  });
 
   const [items, setItems] = useState<TimelineItem[]>(() =>
     loadItemsFromStorage(timelineStorageKey),
@@ -200,10 +235,19 @@ export default function TimelineEditor() {
   const [shareLinkId, setShareLinkId] = useState<string | null>(null);
   const [showSaveNotice, setShowSaveNotice] = useState(false);
   const [noticeType, setNoticeType] = useState<"success" | "error">("success");
-  const [albumPhotos, setAlbumPhotos] = useState<string[]>([]);
-  const [sortMode, setSortMode] = useState<SortMode>("time");
   const [activeDay, setActiveDay] = useState(0);
-  const dayTabs = ["1日目", "2日目", "3日目"];
+  const [tripDates, setTripDates] = useState<{
+    startDate: string;
+    endDate: string;
+  }>({
+    startDate: "",
+    endDate: "",
+  });
+  const dayTabs = useMemo(() => {
+    const days = calcTripDays(tripDates.startDate, tripDates.endDate);
+    const count = days ?? 1;
+    return Array.from({ length: count }, (_, idx) => `${idx + 1}日目`);
+  }, [tripDates.endDate, tripDates.startDate]);
   const didHydrateRef = useRef(false);
 
   // ✅ 初回hydration完了フラグのみ設定（setState削除）
@@ -242,8 +286,32 @@ export default function TimelineEditor() {
       // 失敗したら2のまま
     }
 
+    try {
+      const storedArgsRaw = window.localStorage.getItem(publishArgsKey);
+      if (storedArgsRaw) {
+        const storedArgs = JSON.parse(storedArgsRaw) as Partial<
+          ItineraryPublishArgs
+        >;
+        setTripDates({
+          startDate:
+            typeof storedArgs.start_date === "string"
+              ? storedArgs.start_date
+              : "",
+          endDate:
+            typeof storedArgs.end_date === "string" ? storedArgs.end_date : "",
+        });
+      }
+    } catch {}
+
     didHydrateRef.current = true;
-  }, [timelineStorageKey, peopleStorageKey]);
+  }, [timelineStorageKey, peopleStorageKey, publishArgsKey]);
+
+  useEffect(() => {
+    if (dayTabs.length === 0) return;
+    if (activeDay >= dayTabs.length) {
+      setActiveDay(dayTabs.length - 1);
+    }
+  }, [activeDay, dayTabs.length]);
 
   // ✅ itemsの変更を保存
   useEffect(() => {
@@ -268,6 +336,9 @@ export default function TimelineEditor() {
       const storedArgs = storedArgsRaw
         ? (JSON.parse(storedArgsRaw) as Partial<ItineraryPublishArgs>)
         : null;
+      const publishItems = items.filter(
+        (item) => typeof item.dayIndex === "number",
+      );
       const mergedArgs: ItineraryPublishArgs = {
         itinerary_id: itineraryId,
         title: storedArgs?.title ?? "",
@@ -275,7 +346,7 @@ export default function TimelineEditor() {
         start_date: storedArgs?.start_date ?? "",
         end_date: storedArgs?.end_date ?? "",
         people_count: storedArgs?.people_count ?? peopleCount,
-        items,
+        items: publishItems,
       };
       console.log("[publish] merged defaultValues + items", mergedArgs);
       window.localStorage.setItem(publishArgsKey, JSON.stringify(mergedArgs));
@@ -328,14 +399,10 @@ export default function TimelineEditor() {
   }, [showSaveNotice]);
 
   const sortedItems = useMemo(() => {
-    const cloned = [...items];
-    if (sortMode === "time") {
-      return cloned.sort(
-        (a, b) => timeToMinutes(a.time) - timeToMinutes(b.time),
-      );
-    }
-    return cloned.sort((a, b) => a.orderIndex - b.orderIndex);
-  }, [items, sortMode]);
+    const visibleItems = items.filter((item) => item.dayIndex === activeDay + 1);
+    const cloned = [...visibleItems];
+    return cloned.sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
+  }, [items, activeDay]);
 
   const { categoryTotals, totalAmount, perPersonAmount } = useMemo(() => {
     const totals: Record<TimelineCategory, number> = {
@@ -348,7 +415,10 @@ export default function TimelineEditor() {
       other: 0,
     };
     let total = 0;
-    for (const item of items) {
+    const trackedItems = items.filter(
+      (item) => typeof item.dayIndex === "number",
+    );
+    for (const item of trackedItems) {
       totals[item.category] += item.amount || 0;
       total += item.amount || 0;
     }
@@ -374,32 +444,7 @@ export default function TimelineEditor() {
     setItems((prev) => {
       const nextIndex =
         prev.length > 0 ? Math.max(...prev.map((it) => it.orderIndex)) + 1 : 0;
-      return [...prev, createEmptyItem(nextIndex)];
-    });
-  };
-
-  const moveItem = (id: string, direction: "up" | "down") => {
-    if (sortMode !== "manual") return;
-
-    setItems((prev) => {
-      const ordered = [...prev].sort((a, b) => a.orderIndex - b.orderIndex);
-      const currentIndex = ordered.findIndex((it) => it.id === id);
-      if (currentIndex === -1) return prev;
-
-      const targetIndex =
-        direction === "up" ? currentIndex - 1 : currentIndex + 1;
-      if (targetIndex < 0 || targetIndex >= ordered.length) return prev;
-
-      const current = ordered[currentIndex];
-      const target = ordered[targetIndex];
-
-      return prev.map((it) => {
-        if (it.id === current.id)
-          return { ...it, orderIndex: target.orderIndex };
-        if (it.id === target.id)
-          return { ...it, orderIndex: current.orderIndex };
-        return it;
-      });
+      return [...prev, createEmptyItem(nextIndex, activeDay + 1)];
     });
   };
 
@@ -431,17 +476,7 @@ export default function TimelineEditor() {
             onChange={setActiveDay}
           />
 
-          {/* tools */}
-          <Box
-            px={4}
-            py={2}
-            borderBottom="1px solid #f1f1f0"
-            bg="rgba(255,255,255,0.6)"
-          >
-            <SortModeToggle value={sortMode} onChange={setSortMode} />
-          </Box>
-
-          {/* scroll body */}
+          {/* scroll body (left only) */}
           <Box
             flex={1}
             minH={0}
@@ -450,17 +485,6 @@ export default function TimelineEditor() {
             py={{ base: 5, md: 6 }}
             pb={!isDesktop ? "140px" : "24px"}
           >
-            {showLine && (
-              <Box
-                position="absolute"
-                left="58px"
-                top="10px"
-                bottom="10px"
-                w="2px"
-                bg="#e5e7eb"
-              />
-            )}
-
             {isEmpty ? (
               <Box
                 bg="white"
@@ -475,17 +499,13 @@ export default function TimelineEditor() {
               </Box>
             ) : (
               <Stack gap={5}>
-                {sortedItems.map((item, index) => (
+                {sortedItems.map((item) => (
                   <TimelineItemRow
                     key={item.id}
                     item={item}
-                    sortMode={sortMode}
                     categoryOptions={CATEGORY_OPTIONS}
-                    isFirst={index === 0}
-                    isLast={index === sortedItems.length - 1}
                     onChange={updateItem}
                     onDelete={deleteItem}
-                    onMove={moveItem}
                   />
                 ))}
               </Stack>
@@ -514,14 +534,6 @@ export default function TimelineEditor() {
             <Text mt={6} fontSize="xs" color="#6b7280">
               入力内容はブラウザのローカル（localStorage）に保存されます。
             </Text>
-            <PublishShareActions
-              isPublishing={isPublishing}
-              shareLinkId={shareLinkId}
-              publishError={publishError}
-              onPublish={() => {
-                void handlePublishShare();
-              }}
-            />
           </Box>
         </Flex>
 
@@ -537,18 +549,6 @@ export default function TimelineEditor() {
                 peopleCount={peopleCount}
                 onPeopleChange={setPeopleCount}
                 categoryMeta={SUMMARY_CATEGORY_META}
-              />
-
-              <TripAlbumCard
-                photos={albumPhotos}
-                onAdd={(url) => setAlbumPhotos((prev) => [url, ...prev])}
-                onRemove={(index) =>
-                  setAlbumPhotos((prev) => prev.filter((_, i) => i !== index))
-                }
-                onPhotoClick={(url, index) => {
-                  console.log("clicked:", url);
-                  alert(`clicked: ${index + 1}\n${url}`);
-                }}
               />
 
             </Stack>
@@ -621,4 +621,3 @@ export default function TimelineEditor() {
     </>
   );
 }
-
