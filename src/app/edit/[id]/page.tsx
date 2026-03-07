@@ -2,20 +2,16 @@
 
 import { Box, Button, Flex, Text } from "@chakra-ui/react";
 import { Noto_Sans_JP } from "next/font/google";
-import { useParams, useRouter } from "next/navigation";
-import { PrintNavigationButton } from "@/components/atoms/PrintNavigationButton";
+import {  useRouter } from "next/navigation";
 import TimelineEditor from "@/components/timeline/TimelineEditor";
 
-const PRIMARY = "#0ea5e9";
 const notoSansJP = Noto_Sans_JP({
-  subsets: ["latin", "japanese"],
+  subsets: ["latin"],
   weight: ["400", "700"],
   display: "swap",
 });
 
 export default function EditPage() {
-  const params = useParams();
-  const itineraryId = params.id as string;
   const router = useRouter();
 
   return (
@@ -52,7 +48,7 @@ export default function EditPage() {
         </Button>
 
         <Box minW={0} flex={1}>
-          <Text fontWeight="700" fontSize="md" noOfLines={1}>
+          <Text fontWeight="700" fontSize="md" lineClamp={1}>
             旅のしおりを編集
           </Text>
         </Box>
