@@ -6738,7 +6738,7 @@ snapshots:
       - jiti
       - less
       - lightningcss
-      - msw
+      - mswf
       - sass
       - sass-embedded
       - stylus

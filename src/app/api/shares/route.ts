@@ -4,9 +4,9 @@ import type { CreateShareRequest } from "@/types/share";
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const { id } = await params;
   try {
     const result = await getShareDraftByLinkId(id);
     if (!result) {
